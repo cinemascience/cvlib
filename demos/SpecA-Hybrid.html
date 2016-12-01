@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <title>Cinema Viewer - Spec A</title>
+    <meta name='description' content='A Cinema Viewer capable of browsing Spec A databases'>
+    <meta name='author' content='Jonas Lukasczyk'>
+    <link rel='stylesheet' href='../css/cvlib.css'>
+    <script src='../lib/jquery-3.1.1.min.js'></script>
+    <script src='../js/Parameter.js'></script>
+    <script src='../js/QuerySet.js'></script>
+    <script src='../js/ResultSet.js'></script>
+    <script src='../js/UIFactory.js'></script>
+    <script src='../js/ControlsPhiTheta.js'></script>
+    <script src='../js/Database.js'></script>
+    <script src='../js/DatabaseSpecA.js'></script>
+    <script src='../js/Renderer.js'></script>
+    <script src='../js/RendererSpecA.js'></script>
+</head>
+<body>
+    <script>
+        var db = new CVLIB.DatabaseSpecA('data/volume-render/info.json', function(querySet){
+            var sidebarLayout = CVLIB.UIFactory.createSidebarLayout();
+            sidebarLayout.sidebar.append( '<h2>Cinema Viewer<br>Spec A - Hybrid</h2>' );
+            var queryTable = CVLIB.UIFactory.createVersusQueryTable( querySet );
+            sidebarLayout.sidebar.append(queryTable);
+
+            $('body').append( sidebarLayout );
+
+            var matrix = null;
+            var renderer = new CVLIB.RendererSpecA();
+
+            var renderFunction = function(resultSet){
+                if(matrix)
+                    matrix.remove();
+
+                matrix = CVLIB.UIFactory.createMatrix(resultSet);
+                sidebarLayout.content.append( matrix );
+
+                var map = matrix.viewportMap;
+
+                var p1 = resultSet.querySet.info.p1;
+                var p2 = resultSet.querySet.info.p2;
+
+                var updateSingleViewport = function(querySet){
+                    db.processQuery( querySet, function(resultSet){
+                        renderer.render(resultSet.data, querySet.canvas, true);
+                    });
+                }
+
+                for(var i in resultSet.data)
+                    for(var j in resultSet.data[i]){
+                        var q = querySet.clone();
+                        q.parameters[p1].setValue(i, true);
+                        q.parameters[p2].setValue(j, true);
+
+                        q.emitter.on('change', updateSingleViewport.bind(null,q));
+
+                        var viewport = map[i][j];
+                        renderer.render(resultSet.data[i][j], viewport.canvas);
+                        q.canvas = viewport.canvas;
+                        new CVLIB.ControlsPhiTheta(viewport, q);
+                    }
+            };
+
+            var updateFunction = function(e){
+                db.processQuery( querySet, renderFunction );
+            };
+
+            var loadButton = $('<button>Load</button>');
+            loadButton.on('click', updateFunction);
+            queryTable.find('tr:first td').append(loadButton);
+        });
+    </script>
+</body>
+</html>

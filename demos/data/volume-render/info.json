@@ -1,0 +1,119 @@
+{
+    "arguments": {
+        "theta": {
+            "default": 30,
+            "values": [
+                30,
+                90,
+                150
+            ],
+            "type": "range",
+            "label": "theta"
+        },
+        "phi": {
+            "default": 0,
+            "values": [
+                0,
+                11,
+                22,
+                33,
+                44,
+                55,
+                66,
+                77,
+                88,
+                99,
+                110,
+                121,
+                132,
+                143,
+                154,
+                165
+            ],
+            "type": "range",
+            "label": "phi"
+        },
+        "xValue": {
+            "default": 166,
+            "values": [
+                166,
+                499,
+                832
+            ],
+            "type": "range",
+            "label": "xValue"
+        },
+        "xFlip": {
+            "default": 1,
+            "values": [
+                1
+            ],
+            "type": "range",
+            "label": "xFlip"
+        },
+        "xVisible": {
+            "default": 1,
+            "values": [
+                1
+            ],
+            "type": "range",
+            "label": "xVisible"
+        },
+        "yValue": {
+            "default": 166,
+            "values": [
+                166,
+                499,
+                832
+            ],
+            "type": "range",
+            "label": "yValue"
+        },
+        "yFlip": {
+            "default": 1,
+            "values": [
+                1
+            ],
+            "type": "range",
+            "label": "yFlip"
+        },
+        "yVisible": {
+            "default": 1,
+            "values": [
+                1
+            ],
+            "type": "range",
+            "label": "yVisible"
+        },
+        "zValue": {
+            "default": 166,
+            "values": [
+                166,
+                499,
+                832
+            ],
+            "type": "range",
+            "label": "zValue"
+        },
+        "zFlip": {
+            "default": 1,
+            "values": [
+                1
+            ],
+            "type": "range",
+            "label": "zFlip"
+        },
+        "zVisible": {
+            "default": 1,
+            "values": [
+                1
+            ],
+            "type": "range",
+            "label": "zVisible"
+        }
+    },
+    "name_pattern": "cinema_{theta}_{phi}_{xValue}_{xFlip}_{xVisible}_{yValue}_{yFlip}_{yVisible}_{zValue}_{zFlip}_{zVisible}.jpg",
+    "metadata": {
+        "type": "parametric-image-stack"
+    }
+}
