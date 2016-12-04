@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: UIFactory.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: UIFactory.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict'; /* globals $ */
+(function(){
+/**
+ * Factory for UI Elements
+ * @exports UIFactory
+ */
+var UIFactory = {
+
+    /**
+     * Creates a DIV element containing a CANVAS
+     * @return {div}
+     */
+    createViewport: function(){
+            var canvas = $('&lt;canvas class="cvlib_canvas">&lt;/canvas>');
+
+            var container = $('&lt;div class="cvlib_canvasContainer">&lt;/div>');
+            container.append(canvas);
+
+            canvas.on('resized', function(canvas, container){
+                container.width(canvas.width());
+                container.height(canvas.height());
+            }.bind(null, canvas, container));
+
+            container.canvas = canvas;
+
+            return container;
+    },
+
+    /**
+     * Helper function which returns a symbol for each parameter type
+     * @param {string} type - parameter object
+     * @return {string} symbol in html encoding
+     */
+    getTypeSymbol: function(type){
+        switch(type){
+            case 'range':
+                return '&amp;xharr;';
+            case 'set':
+                return '&amp;#9863;';
+            case 'boolean':
+                return '&amp;check;';
+            default:
+                return type;
+        }
+    },
+
+    /**
+     * Creates a TR element with multiple-value input widgets for a parameter
+     * @param {parameter} p - parameter object
+     * @return {tr}
+     */
+    createVariableRow: function(p){
+        var tr = $('&lt;tr id="cvlib_row_'+p.label+'" class="cvlib_variableRow">&lt;/tr>');
+
+        // Add Label
+        var label = $('&lt;td>' + p.label + '&lt;/td>');
+        label.on('click', function(){
+            console.log(this.label, this);
+        }.bind(p));
+        tr.append(label);
+
+        tr.append('&lt;td>'+this.getTypeSymbol(p.type)+'&lt;/td>');
+
+        switch (p.type) {
+            case 'range':
+                if(p.values.length&lt;2){
+                    tr.append('&lt;td>'+p.values[0]+' - '+p.values[0]+'&lt;/td>&lt;td>&lt;/td>');
+                } else {
+                    var minMaxInput = this.createMinMaxNumberInput(p);
+                    tr.append(
+                        $('&lt;td>&lt;/td>')
+                            .append(minMaxInput[0])
+                            .append(' - ')
+                            .append(minMaxInput[1]),
+                        '&lt;td>&lt;/td>'
+                    );
+                }
+                break;
+            case 'set':
+                if(p.values.length&lt;2){
+                    tr.append('&lt;td>'+p.values[0]+'&lt;/td>&lt;td>&lt;/td>');
+                } else {
+                    tr.append( $('&lt;td colspan=2>&lt;/td>').append( this.createSetInput(p) ) );
+                }
+                break;
+            case 'boolean':
+                tr.append('&lt;td>&lt;/td>&lt;td>&lt;/td>');
+                break;
+        }
+
+        return tr;
+    },
+
+    /**
+     * Creates a TR element with single-value input widgets for a parameter
+     * @param {parameter} p - parameter object
+     * @return {tr}
+     */
+    createFixedRow: function(p){
+        var tr = $('&lt;tr id="cvlib_row_'+p.label+'">&lt;/tr>');
+
+        // Add Label
+        var label = $('&lt;td>' + p.label + '&lt;/td>');
+        label.on('click', function(){
+            console.log(this.label, this);
+        }.bind(p));
+        tr.append(label);
+
+        tr.append('&lt;td>'+this.getTypeSymbol(p.type)+'&lt;/td>');
+
+        switch (p.type) {
+            case 'range':
+                if(p.values.length&lt;2){
+                    tr.append('&lt;td>'+p.query+'&lt;/td>&lt;td>&lt;/td>');
+                } else {
+                    var sliderInput = this.createSliderInput(p);
+                    var numberInput = this.createNumberInput(p);
+                    tr.append(
+                        $('&lt;td>&lt;/td>').append(sliderInput),
+                        $('&lt;td>&lt;/td>').append(numberInput)
+                    );
+                }
+                break;
+            case 'set':
+                if(p.values.length&lt;2){
+                    tr.append('&lt;td>'+p.query+'&lt;/td>&lt;td>&lt;/td>');
+                } else {
+                    var selectInput = this.createSelectInput(p);
+                    tr.append(
+                        $('&lt;td>&lt;/td>').append(selectInput),
+                        '&lt;td>&lt;/td>'
+                    );
+                }
+                break;
+            case 'boolean':
+                tr.append('&lt;td>&lt;/td>&lt;td>&lt;/td>');
+                break;
+        }
+
+        return tr;
+    },
+
+    /**
+     * Creates a TABLE element with cells containing viewports based on a resultSet
+     * @param {ResultSet} resultSet - used to determine matrix size
+     * @return {table}
+     */
+    createMatrix: function(resultSet){
+        var table = $('&lt;table class="cvlib_matrix">&lt;/table>');
+        var map = {};
+
+        for(var i in resultSet.data){
+            var tr = $('&lt;tr>&lt;/tr>');
+            map[i] = {};
+            for(var j in resultSet.data[i]){
+                var viewport = this.createViewport();
+                viewport.append('&lt;span>('+i+', '+j+')&lt;/span>');
+                tr.append( $('&lt;td>&lt;/td>').append(viewport) );
+                map[i][j] = viewport;
+            }
+            table.append(tr);
+        }
+
+        table.viewportMap = map;
+
+        table.on('transformed', function(e){
+            var style = e.target.style;
+            this
+                .css({
+                    left: style.left,
+                    top: style.top,
+                })
+                .width(style.width)
+                .height(style.height);
+        }.bind(table.find('canvas')));
+
+        return table;
+    },
+
+    /**
+     * Creates a TABLE element with multiple-value input widgets for two parameters and single-value widgets for the others based on a querySet
+     * @param {QuerySet} querySet - contains parameters used to generate the table
+     * @return {table}
+     */
+    createVersusQueryTable: function(querySet){
+        var table = this.createSimpleQueryTable(querySet);
+
+        var parameters = Object.keys(querySet.parameters);
+        if(parameters.length&lt;2){
+            console.error('Cannot create Versus Table for querySets with less then 2 parameters.');
+            return;
+        }
+
+        var sel1 = this.createRawSelectInput( parameters );
+        sel1.oldValue = parameters[0];
+        sel1.val(parameters[0]);
+        var sel2 = this.createRawSelectInput( parameters );
+        sel2.oldValue = parameters[1];
+        sel2.val(parameters[1]);
+
+        var updateTable = function(){
+            var p1 = sel1.val();
+            var p2 = sel2.val();
+
+            var oldP1 = querySet.info.p1;
+            var oldP2 = querySet.info.p2;
+
+            if(p1 === p2){
+                sel1.val(oldP1);
+                sel2.val(oldP2);
+                return;
+            }
+
+            querySet.info.p1 = p1;
+            querySet.info.p2 = p2;
+
+            var oldRow, newRow, p;
+
+            var replaceVariableRow = function(id){
+                oldRow = table.find('#cvlib_row_'+id);
+                p = querySet.parameters[id];
+                p.query = p.values[0];
+                newRow = UIFactory.createFixedRow(p);
+                oldRow.after( newRow );
+                oldRow.remove();
+            };
+
+            var replaceFixedRow = function(id){
+                oldRow = table.find('#cvlib_row_'+id);
+                p = querySet.parameters[id];
+                p.query = [p.values[0]];
+                newRow = UIFactory.createVariableRow(p);
+                oldRow.after( newRow );
+                oldRow.remove();
+            };
+
+            if(oldP1 !== p1){
+                if(oldP1) replaceVariableRow(oldP1);
+                replaceFixedRow(p1);
+                table.trigger('resized');
+            }
+            if(oldP2 !== p2){
+                if(oldP2) replaceVariableRow(oldP2);
+                replaceFixedRow(p2);
+                table.trigger('resized');
+            }
+        };
+
+        sel1.on('change', updateTable);
+        sel2.on('change', updateTable);
+
+        table.prepend(
+            $('&lt;tr>&lt;/tr>')
+                .append(
+                    $('&lt;td colspan=4>&lt;/td>')
+                        .append(sel1)
+                        .append(' VS ')
+                        .append(sel2)
+                )
+        );
+
+        querySet.info = {
+            type: 'matrix',
+            p1: null,
+            p2: null,
+        };
+
+        updateTable();
+
+        return table;
+    },
+
+    /**
+     * Creates a TABLE element with single-value input widgets based on a querySet
+     * @param {QuerySet} querySet - its parameters will be the targets of the input widgets
+     * @return {table}
+     */
+    createSimpleQueryTable: function(querySet){
+        var tr, table = $('&lt;table class="cvlib_queryTable">&lt;/table>');
+
+        var p,i;
+        for(i in querySet.parameters){
+            p = querySet.parameters[i];
+            table.append( this.createFixedRow(p) );
+        }
+
+        return table;
+    },
+
+    /**
+     * Creates a number INPUT element with min, max, and default value
+     * @param {number} min - min
+     * @param {number} max - max
+     * @param {number} value - default value
+     * @return {input}
+     */
+    createRawNumberInput: function(min, max, value){
+        return $('&lt;input type="number" min="'+min+'" max="'+max+'" value="'+value+'">');
+    },
+
+    /**
+     * Creates a number INPUT element for a parameter
+     * @param {parameter} p - target of the input widget
+     * @return {input}
+     */
+    createNumberInput: function(p) {
+        var input = this.createRawNumberInput(p.values[0], p.values[p.values.length-1], p.query);
+
+        input.oldValue = p.query;
+
+        p.emitter.on('change', function(input, e, p){
+            input.oldValue = p.query;
+            input.val(p.query);
+        }.bind(null, input));
+
+        input.on('input', function(input, p){
+            var v = parseFloat(input.val());
+            v = input.oldValue &lt; v
+                ? p.values[ Math.min(p.values.indexOf(input.oldValue)+1, p.values.length-1)]
+                : p.values[ Math.max(p.values.indexOf(input.oldValue)-1, 0)];
+            p.setValue(parseFloat(v));
+        }.bind(null, input, p));
+
+        return input;
+    },
+
+    /**
+     * Creates a range INPUT element for a min, max, and default value
+     * @param {number} min - min
+     * @param {number} max - max
+     * @param {number} value - default value
+     * @return {input}
+     */
+    createRawSliderInput: function(min, max, value){
+        return $('&lt;input type="range"  min="'+min+'" max="'+max+'" value="'+value+'">');
+    },
+
+    /**
+     * Creates a range INPUT element for a parameter
+     * @param {parameter} p - target of the input widget
+     * @return {input}
+     */
+    createSliderInput: function(p) {
+        var input = this.createRawSliderInput(0, p.values.length-1, p.values.indexOf(p.query));
+
+        p.emitter.on('change', function(input, e, p){
+            input.val( parseFloat(p.values.indexOf(p.query)) );
+        }.bind(null, input));
+
+        input.on('input', function(input, p){
+            p.setValue( parseFloat(p.values[input.val()]) );
+        }.bind(null, input, p));
+
+        return input;
+    },
+
+    /**
+     * Creates a SELECT element for a set of labels and values
+     * @param {string[]} labels
+     * @param {object[]} values
+     * @return {select}
+     */
+    createRawSelectInput: function(labels, values){
+        var select = $('&lt;select>&lt;/select>');
+        for(var i in labels)
+            select.append('&lt;option'+ (values ? ' value="'+values[i]+'"' : '') +'>'+labels[i]+'&lt;/option>');
+
+        return select;
+    },
+
+    /**
+     * Creates a SELECT element for a parameter
+     * @param {parameter} p - target of the input widget
+     * @return {input}
+     */
+    createSelectInput: function(p){
+        var select = this.createRawSelectInput(p.values);
+
+        p.emitter.on('change', function(select, e, p){
+            select.val(p.query);
+        }.bind(null, select));
+
+        select.on('change', function(select, p){
+            p.setValue(select.val());
+        }.bind(null, select, p));
+
+        return select;
+    },
+
+    /**
+     * Creates a checkbox INPUT element
+     * @param {bool} checked - default
+     * @return {input}
+     */
+    createRawCheckboxInput: function(checked){
+        return $('&lt;input type="checkbox" ' + (checked ? 'checked' : '') + '>');
+    },
+
+    /**
+     * Creates a checkbox INPUT element for a parameter
+     * @param {parameter} p - target of the input widget
+     * @return {input}
+     */
+    createCheckboxInput: function(p){
+        var select = this.createRawSelectInput(p);
+
+        p.emitter.on('change', function(select, e, p){
+            select.val(p.query);
+        }.bind(null, select));
+
+        select.on('change', function(select, p){
+            p.setValue(select.val());
+        }.bind(null, select, p));
+
+        return select;
+    },
+
+    /**
+     * Creates a pair of synchronized number INPUT elements for a parameter representing a min and max value
+     * @param {parameter} p - target of the input widgets
+     * @return {Array.&lt;input>} the min and max element
+     */
+    createMinMaxNumberInput: function(p) {
+        var inputMin = this.createRawNumberInput(p.values[0], p.values[p.values.length-1], p.query[0]);
+        var inputMax = this.createRawNumberInput(p.values[0], p.values[p.values.length-1], p.query[p.query.length-1]);
+
+        inputMin.oldValue = p.query[0];
+        inputMax.oldValue = p.query[p.query.length-1];
+
+        p.emitter.on('change', function(inputMin, inputMax, e, p){
+            inputMin.oldValue = p.query[0];
+            inputMin.val(p.query[0]);
+
+            inputMax.oldValue = p.query[p.query.length-1];
+            inputMax.val(p.query[p.query.length-1]);
+        }.bind(null, inputMin, inputMax));
+
+        inputMin.on('input', function(inputMin, inputMax, p){
+            var v = parseFloat(inputMin.val());
+            v = inputMin.oldValue &lt; v
+                ? p.values[ Math.min(p.values.indexOf(inputMin.oldValue)+1, p.values.length-1)]
+                : p.values[ Math.max(p.values.indexOf(inputMin.oldValue)-1, 0)];
+            v = parseFloat(v);
+            if(parseFloat(inputMax.val())&lt;v){
+                inputMax.val(v);
+                inputMax.oldValue = v;
+            }
+            inputMin.val(v);
+            inputMin.oldValue = v;
+
+            var query = [];
+            for(var i=p.values.indexOf(v); i&lt;=p.values.indexOf(parseFloat(inputMax.val())); i++)
+                query.push(p.values[i]);
+
+            p.setValue(query);
+        }.bind(null, inputMin, inputMax, p));
+
+        inputMax.on('input', function(inputMin, inputMax, p){
+            var v = parseFloat(inputMax.val());
+            v = inputMax.oldValue &lt; v
+                ? p.values[ Math.min(p.values.indexOf(inputMax.oldValue)+1, p.values.length-1)]
+                : p.values[ Math.max(p.values.indexOf(inputMax.oldValue)-1, 0)];
+            v = parseFloat(v);
+            if(parseFloat(inputMin.val())>v){
+                inputMin.val(v);
+                inputMin.oldValue = v;
+            }
+            inputMax.val(v);
+            inputMax.oldValue = v;
+
+            var query = [];
+            for(var i=p.values.indexOf(parseFloat(inputMin.val())); i&lt;=p.values.indexOf(v); i++)
+                query.push(p.values[i]);
+
+            p.setValue(query);
+        }.bind(null, inputMin, inputMax, p));
+
+        return [inputMin, inputMax];
+    },
+
+    /**
+     * Creates a container containing two interactive lists based on parameter. The first list contains all available options and the other all selected options.
+     * @param {parameter} p - target of the input widgets
+     * @return {div}
+     */
+    createSetInput: function(p){
+        var container = $('&lt;div class="cvlib_setInput">&lt;/div>');
+        var sourceList = $('&lt;ul>&lt;/ul>');
+        var targetList = $('&lt;ul>&lt;/ul>');
+
+        var dragElement = null;
+
+        var updateSetInput = function(){
+            var values = [];
+            var temp = targetList.find('li');
+            for(var i=0, j=temp.length-1; i&lt;j; i++)
+                values.push(temp[i].innerHTML);
+            p.setValue(values);
+        };
+
+        var addDragListeners = function(li){
+            li.on('dragenter', function(){
+                $(this).addClass('dragOver');
+            });
+            li.on('dragover', function(e){
+                e.preventDefault();
+            });
+            li.on('dragleave', function(){
+                $(this).removeClass('dragOver');
+            });
+            li.on('dragstart', function(e){
+                dragElement = this;
+            });
+            li.on('drop', function(e){
+                $(this).removeClass('dragOver');
+                if(dragElement!=this){
+                    $(this).before(dragElement);
+                    updateSetInput();
+                }
+            });
+        };
+
+        var ghost = $('&lt;li>&lt;/li>');
+        addDragListeners(ghost);
+        targetList.append(ghost);
+
+        var createTargetLi = function(v){
+            var li = $('&lt;li draggable="true">'+v+'&lt;/li>');
+            addDragListeners(li);
+            li.on('click', function(e){
+                if(e.which === 2 &amp;&amp; targetList.find('li').length>2){
+                    $(this).remove();
+                    updateSetInput();
+                }
+            });
+            return li;
+        };
+
+        var addTarget = function(e){
+            if(!targetList.find('li:contains('+this.v+')').length){
+                ghost.before( createTargetLi(this.v) );
+                updateSetInput();
+            }
+        };
+
+        p.emitter.on('change', function(e){
+            var i,dej;
+            var temp = ghost.prev();
+            while(temp.length){
+                temp.remove();
+                temp = ghost.prev();
+            }
+            for(i in p.query){
+                ghost.before( createTargetLi(p.query[i]) );
+            }
+        });
+
+        var i;
+
+        for(i in p.query){
+            ghost.before( createTargetLi(p.query[i]) );
+        }
+
+        for(i in p.values){
+            var source = $('&lt;li>'+p.values[i]+'&lt;/li>');
+            source[0].v = p.values[i];
+            source.on('click', addTarget);
+            sourceList.append(source);
+        }
+        container.append(sourceList, targetList);
+
+        return container;
+    },
+
+    /**
+     * Creates a container containing a sidebar and content container
+     * @return {div}
+     */
+    createSidebarLayout: function(){
+        var container = $('&lt;div>&lt;/div>');
+        var sidebar = $('&lt;div class="cvlib_sidebarLayoutSidebar">&lt;/div>');
+        var content = $('&lt;div class="cvlib_sidebarLayoutContent">&lt;/div>');
+        var oldAppend = content.append;
+        content.append = function(dom){
+            content.css({left: sidebar[0].getBoundingClientRect().right});
+            oldAppend.apply(this, dom);
+        };
+
+        sidebar.on('resized', function(){
+            content.css({left: sidebar[0].getBoundingClientRect().right});
+        });
+
+        container.append(sidebar, content);
+
+        container.sidebar = sidebar;
+        container.content = content;
+
+        return container;
+    },
+
+    /**
+     * Creates a DIV element representing a loading bar with the functions 'setSteps' and 'progress'.
+     * @return {div}
+     */
+    createLoadingBar: function(){
+        var bar = $('&lt;div class="cvlib_loadingBar">&lt;/div>');
+        bar.setSteps = function(steps){
+            this.width(0);
+            this.fadeIn(0);
+            this.step = 0;
+            this.steps = steps;
+        };
+        bar.progress = function(){
+            this.step++;
+            this.width( this.step/this.steps * $(window).width() );
+            if(this.step === this.steps)
+                this.fadeOut(300);
+        };
+        return bar;
+    },
+
+    /**
+     * Creates a DIV element representing a loading symbol
+     * @return {div}
+     */
+    createLoadingSymbol: function(){
+        return $('&lt;div class="cvlib_loadingSymbol">Loading...&lt;/div>');
+    }
+};
+
+if(!window.CVLIB) window.CVLIB = {};
+window.CVLIB.UIFactory = UIFactory;
+
+})();
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-UIFactory.html">UIFactory</a></li></ul><h3>Classes</h3><ul><li><a href="module-CVLIB-ControlsBasic.html">ControlsBasic</a></li><li><a href="module-CVLIB-ControlsPhiTheta.html">ControlsPhiTheta</a></li><li><a href="module-CVLIB-Database.html">Database</a></li><li><a href="module-CVLIB-DatabaseSpecA.html">DatabaseSpecA</a></li><li><a href="module-CVLIB-Parameter.html">Parameter</a></li><li><a href="module-CVLIB-QuerySet.html">QuerySet</a></li><li><a href="module-CVLIB-Renderer.html">Renderer</a></li><li><a href="module-CVLIB-RendererSpecA.html">RendererSpecA</a></li><li><a href="module-CVLIB-ResultSet.html">ResultSet</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu Dec 01 2016 01:30:23 GMT+0100 (CET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
