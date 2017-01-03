@@ -68,11 +68,12 @@ var UIFactory = {
                 } else {
                     var minMaxInput = this.createMinMaxNumberInput(p);
                     tr.append(
-                        $('<td></td>')
+                        $('<td colspan="2"></td>')
                             .append(minMaxInput[0])
+                            .append(minMaxInput[1])
                             .append(' - ')
-                            .append(minMaxInput[1]),
-                        '<td></td>'
+                            .append(minMaxInput[2])
+                            .append(minMaxInput[3])
                     );
                 }
                 break;
@@ -295,7 +296,9 @@ var UIFactory = {
      * @return {input}
      */
     createRawNumberInput: function(min, max, value){
-        return $('<input type="number" min="'+min+'" max="'+max+'" value="'+value+'">');
+        // return $('<input type="number" min="'+min+'" max="'+max+'" value="'+value+'">');
+        // Fix number format
+        return $('<input type="number" value="'+value+'" readonly>');
     },
 
     /**
@@ -313,13 +316,14 @@ var UIFactory = {
             input.val(p.query);
         }.bind(null, input));
 
-        input.on('input', function(input, p){
-            var v = parseFloat(input.val());
-            v = input.oldValue < v
-                ? p.values[ Math.min(p.values.indexOf(input.oldValue)+1, p.values.length-1)]
-                : p.values[ Math.max(p.values.indexOf(input.oldValue)-1, 0)];
-            p.setValue(parseFloat(v));
-        }.bind(null, input, p));
+        // Fix number format
+        // input.on('input', function(input, p){
+        //     var v = parseFloat(input.val());
+        //     v = input.oldValue < v
+        //         ? p.values[ Math.min(p.values.indexOf(input.oldValue)+1, p.values.length-1)]
+        //         : p.values[ Math.max(p.values.indexOf(input.oldValue)-1, 0)];
+        //     p.setValue(parseFloat(v));
+        // }.bind(null, input, p));
 
         return input;
     },
@@ -344,11 +348,11 @@ var UIFactory = {
         var input = this.createRawSliderInput(0, p.values.length-1, p.values.indexOf(p.query));
 
         p.emitter.on('change', function(input, e, p){
-            input.val( parseFloat(p.values.indexOf(p.query)) );
+            input.val( parseInt(p.values.indexOf(p.query)) );
         }.bind(null, input));
 
         input.on('input', function(input, p){
-            p.setValue( parseFloat(p.values[input.val()]) );
+            p.setValue( p.values[input.val()] );
         }.bind(null, input, p));
 
         return input;
@@ -421,61 +425,102 @@ var UIFactory = {
      * @return {Array.<input>} the min and max element
      */
     createMinMaxNumberInput: function(p) {
-        var inputMin = this.createRawNumberInput(p.values[0], p.values[p.values.length-1], p.query[0]);
-        var inputMax = this.createRawNumberInput(p.values[0], p.values[p.values.length-1], p.query[p.query.length-1]);
+        var minInput = $('<input type="number" value="0" min="0" max="'+(p.values.length-1)+'" step="1"></input>');
+        var minInputVis = this.createRawNumberInput(0,0,p.query[0]);
 
-        inputMin.oldValue = p.query[0];
-        inputMax.oldValue = p.query[p.query.length-1];
+        var maxInput = $('<input type="number" value="0" min="0" max="'+(p.values.length-1)+'" step="1"></input>');
+        var maxInputVis = this.createRawNumberInput(0,0,p.query[0]);
 
-        p.emitter.on('change', function(inputMin, inputMax, e, p){
-            inputMin.oldValue = p.query[0];
-            inputMin.val(p.query[0]);
+        minInput.on('input', function(){
+            var v1 = parseInt(minInput.val());
+            minInputVis.val(p.values[v1]);
 
-            inputMax.oldValue = p.query[p.query.length-1];
-            inputMax.val(p.query[p.query.length-1]);
-        }.bind(null, inputMin, inputMax));
-
-        inputMin.on('input', function(inputMin, inputMax, p){
-            var v = parseFloat(inputMin.val());
-            v = inputMin.oldValue < v
-                ? p.values[ Math.min(p.values.indexOf(inputMin.oldValue)+1, p.values.length-1)]
-                : p.values[ Math.max(p.values.indexOf(inputMin.oldValue)-1, 0)];
-            v = parseFloat(v);
-            if(parseFloat(inputMax.val())<v){
-                inputMax.val(v);
-                inputMax.oldValue = v;
+            var v2 = parseInt(maxInput.val());
+            if(v1>v2){
+                maxInput.val(v1);
+                maxInputVis.val(p.values[v1]);
+                v2=v1;
             }
-            inputMin.val(v);
-            inputMin.oldValue = v;
 
             var query = [];
-            for(var i=p.values.indexOf(v); i<=p.values.indexOf(parseFloat(inputMax.val())); i++)
+            for(var i=v1; i<=v2; i++)
                 query.push(p.values[i]);
-
             p.setValue(query);
-        }.bind(null, inputMin, inputMax, p));
+        });
 
-        inputMax.on('input', function(inputMin, inputMax, p){
-            var v = parseFloat(inputMax.val());
-            v = inputMax.oldValue < v
-                ? p.values[ Math.min(p.values.indexOf(inputMax.oldValue)+1, p.values.length-1)]
-                : p.values[ Math.max(p.values.indexOf(inputMax.oldValue)-1, 0)];
-            v = parseFloat(v);
-            if(parseFloat(inputMin.val())>v){
-                inputMin.val(v);
-                inputMin.oldValue = v;
+        maxInput.on('input', function(){
+            var v2 = parseInt(maxInput.val());
+            maxInputVis.val(p.values[v2]);
+
+            var v1 = parseInt(minInput.val());
+            if(v1>v2){
+                minInput.val(v2);
+                minInputVis.val(p.values[v2]);
+                v1=v2;
             }
-            inputMax.val(v);
-            inputMax.oldValue = v;
 
             var query = [];
-            for(var i=p.values.indexOf(parseFloat(inputMin.val())); i<=p.values.indexOf(v); i++)
+            for(var i=v1; i<=v2; i++)
                 query.push(p.values[i]);
-
             p.setValue(query);
-        }.bind(null, inputMin, inputMax, p));
+        });
 
-        return [inputMin, inputMax];
+        // var inputMin = this.createRawNumberInput(p.values[0], p.values[p.values.length-1], p.query[0]);
+        // var inputMax = this.createRawNumberInput(p.values[0], p.values[p.values.length-1], p.query[p.query.length-1]);
+
+        // inputMin.oldValue = p.query[0];
+        // inputMax.oldValue = p.query[p.query.length-1];
+
+        // p.emitter.on('change', function(inputMin, inputMax, e, p){
+        //     inputMin.oldValue = p.query[0];
+        //     inputMin.val(p.query[0]);
+
+        //     inputMax.oldValue = p.query[p.query.length-1];
+        //     inputMax.val(p.query[p.query.length-1]);
+        // }.bind(null, inputMin, inputMax));
+
+        // Fix number input
+        // inputMin.on('input', function(inputMin, inputMax, p){
+        //     var v = parseFloat(inputMin.val());
+        //     v = inputMin.oldValue < v
+        //         ? p.values[ Math.min(p.values.indexOf(inputMin.oldValue)+1, p.values.length-1)]
+        //         : p.values[ Math.max(p.values.indexOf(inputMin.oldValue)-1, 0)];
+        //     v = parseFloat(v);
+        //     if(parseFloat(inputMax.val())<v){
+        //         inputMax.val(v);
+        //         inputMax.oldValue = v;
+        //     }
+        //     inputMin.val(v);
+        //     inputMin.oldValue = v;
+
+        //     var query = [];
+        //     for(var i=p.values.indexOf(v); i<=p.values.indexOf(parseFloat(inputMax.val())); i++)
+        //         query.push(p.values[i]);
+
+        //     p.setValue(query);
+        // }.bind(null, inputMin, inputMax, p));
+
+        // inputMax.on('input', function(inputMin, inputMax, p){
+        //     var v = parseFloat(inputMax.val());
+        //     v = inputMax.oldValue < v
+        //         ? p.values[ Math.min(p.values.indexOf(inputMax.oldValue)+1, p.values.length-1)]
+        //         : p.values[ Math.max(p.values.indexOf(inputMax.oldValue)-1, 0)];
+        //     v = parseFloat(v);
+        //     if(parseFloat(inputMin.val())>v){
+        //         inputMin.val(v);
+        //         inputMin.oldValue = v;
+        //     }
+        //     inputMax.val(v);
+        //     inputMax.oldValue = v;
+
+        //     var query = [];
+        //     for(var i=p.values.indexOf(parseFloat(inputMin.val())); i<=p.values.indexOf(v); i++)
+        //         query.push(p.values[i]);
+
+        //     p.setValue(query);
+        // }.bind(null, inputMin, inputMax, p));
+
+        return [minInput, minInputVis, maxInput, maxInputVis];
     },
 
     /**
