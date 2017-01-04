@@ -298,7 +298,8 @@ var UIFactory = {
     createRawNumberInput: function(min, max, value){
         // return $('<input type="number" min="'+min+'" max="'+max+'" value="'+value+'">');
         // Fix number format
-        return $('<input type="number" value="'+value+'" readonly>');
+        // return $('<input type="number" value="'+value+'" readonly>');
+        return $('<input class="cvlib_numberInput" type="text" value="'+value+'" readonly>');
     },
 
     /**

@@ -138,6 +138,11 @@
     top:4px;
 }
 
+.cvlib_numberInput {
+    width:50px;
+    text-align: right;
+}
+
 /*.cvlib_loading {*/
 /*    position:absolute;*/
 /*    left:5px;*/
