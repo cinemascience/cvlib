@@ -53,8 +53,8 @@ DatabaseSpecA.prototype.validateJSON = function(json){
     console.log('Processing JSON-File:', json);
 
     var parseErrorFlag = false;
-    var parseError = function(){
-        console.error('JSON-File does not meet Spec A:', arguments);
+    var parseError = function(msg){
+        console.error('JSON-File does not meet Spec A:', msg);
         parseErrorFlag = true;
     }.bind(this);
 
@@ -65,11 +65,11 @@ DatabaseSpecA.prototype.validateJSON = function(json){
         || !json.hasOwnProperty( 'metadata'     )
         || !json.hasOwnProperty( 'name_pattern' )
     ){
-        parseError('JSON-File has no "arguments", "metadata", or "name_pattern" attribute');
+        parseError('JSON-File has no attribute \'arguments\', \'metadata\', or \'name_pattern\'');
     }
     // Check url to json.arguments consistancy
     if( $.type(json.name_pattern) !== 'string' ){
-        parseError('json.name_pattern is not of type "String"');
+        parseError('json.name_pattern is not of type \'String\'');
 
     }
     var argumentList = json.name_pattern.match(/\{(.*?)\}/g);
@@ -98,15 +98,17 @@ DatabaseSpecA.prototype.validateJSON = function(json){
                 if(!$.isNumeric(parameter.default))
                     parseError('Default value of range Parameter is not Numeric', parameter);
 
-                parameter.default = parseFloat(parameter.default);
+                // parameter.default = parseFloat(parameter.default);
+                parameter.default = parameter.default;
 
                 values = [];
                 isContained = false;
                 for(j in parameter.values){
                     if(!$.isNumeric(parameter.values[j]))
-                        parseError('Parameter is of type "range" but members of its values are not Numeric', parameter);
+                        parseError('Parameter is of type \'range\' but members of its values are not Numeric', parameter);
 
-                    values[j] = parseFloat(parameter.values[j]);
+                    // values[j] = parseFloat(parameter.values[j]);
+                    values[j] = parameter.values[j];
                     if(values[j] === parameter.default) isContained = true;
                 }
                 if(!isContained)
