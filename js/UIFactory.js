@@ -155,7 +155,10 @@ var UIFactory = {
             map[i] = {};
             for(var j in resultSet.data[i]){
                 var viewport = this.createViewport();
-                viewport.append('<span>('+i+', '+j+')</span>');
+                if (resultSet.data[i][j].hasOwnProperty('label'))
+                    viewport.append('<span>'+resultSet.data[i][j].label+'</span>');
+                else
+                    viewport.append('<span>('+i+', '+j+')</span>');    
                 tr.append( $('<td></td>').append(viewport) );
                 map[i][j] = viewport;
             }

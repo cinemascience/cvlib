@@ -162,7 +162,7 @@ DatabaseSpecA.prototype.processQuery = function(querySet, callback){
                 querySet.serialize(),
                 {
                     type: 'image',
-                    src: dir + patternReplace(pattern, querySet.parameters)
+                    src: dir + patternReplace(pattern, querySet.parameters),
                 }
             );
             break;
@@ -183,7 +183,7 @@ DatabaseSpecA.prototype.processQuery = function(querySet, callback){
                     p2qi = p2q[j];
                     data[p1qi][p2qi] = {
                         type: 'image',
-                        src: dir + pattern.replace('{'+p2+'}', p2qi)
+                        src: dir + pattern.replace('{'+p2+'}', p2qi),
                     };
                 }
             }
@@ -203,6 +203,34 @@ DatabaseSpecA.prototype.processQuery = function(querySet, callback){
     callback(
         resultSet
     );
+};
+
+/**
+ * Asynchronously processes a querySet and passes the resultSet to a callback
+ * Allows for a customizable label to be added to each image
+ * @param {QuerySet} querySet
+ * @param {String}   label
+ * @param {function} callback
+ */
+DatabaseSpecA.prototype.processQueryWithLabels = function(querySet, label, callback){
+    var addLabels = function(resultSet) {
+        switch (querySet.info.type) {
+            case 'single' :
+                $.extend(resultSet.data,{label: label});
+                break;
+            case 'matrix' :
+                for (var i in resultSet.data)
+                    for (var j in resultSet.data[i])
+                        $.extend(resultSet.data[i][j],{label: label});
+                break;
+        }
+
+        callback(
+            resultSet
+        );
+    }
+
+    this.processQuery(querySet, addLabels); 
 };
 
 if(!window.CVLIB) window.CVLIB = {};
