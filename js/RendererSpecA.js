@@ -22,7 +22,7 @@ RendererSpecA.prototype.constructor = RendererSpecA;
 RendererSpecA.prototype.render = function(element, canvasJQ, abortOld){
     var canvas = canvasJQ[0];
     switch (element.type) {
-        case 'image': case 'image_with_label' :
+        case 'image':
             if(element.hasOwnProperty('img'))
                 canvas.getContext('2d').drawImage(element.img, 0, 0);
             else {
@@ -44,7 +44,7 @@ RendererSpecA.prototype.render = function(element, canvasJQ, abortOld){
             break;
 
         default:
-            console.error('Renderer doesn\' support element type', element.type, element);
+            console.error('Renderer doesn\'t support element type', element.type, element);
     }
 };
 

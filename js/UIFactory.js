@@ -13,8 +13,14 @@ var UIFactory = {
     createViewport: function(){
             var canvas = $('<canvas class="cvlib_canvas"></canvas>');
 
+            var label = $('<div class="cvlib_label"></div>');
+            var contents = $('<div></div>');
+            label.append(contents);
+            label.contents = contents;
+
             var container = $('<div class="cvlib_canvasContainer"></div>');
             container.append(canvas);
+            container.append(label);
 
             canvas.on('resized', function(canvas, container){
                 container.width(canvas.width());
@@ -22,6 +28,7 @@ var UIFactory = {
             }.bind(null, canvas, container));
 
             container.canvas = canvas;
+            container.label = label;
 
             return container;
     },
@@ -155,9 +162,7 @@ var UIFactory = {
             map[i] = {};
             for(var j in resultSet.data[i]){
                 var viewport = this.createViewport();
-                if (resultSet.data[i][j].hasOwnProperty('label'))
-                    viewport.append('<span>'+resultSet.data[i][j].label+'</span>');
-                else
+                if (!(resultSet.data[i][j].hasOwnProperty('label')))
                     viewport.append('<span>('+i+', '+j+')</span>');    
                 tr.append( $('<td></td>').append(viewport) );
                 map[i][j] = viewport;

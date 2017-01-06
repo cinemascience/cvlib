@@ -213,15 +213,40 @@ DatabaseSpecA.prototype.processQuery = function(querySet, callback){
  * @param {function} callback
  */
 DatabaseSpecA.prototype.processQueryWithLabels = function(querySet, label, callback){
+
+    var replaceAll = function(string, search, replacement) {
+        return string.split(search).join(replacement);
+    }
+
+    var patternReplaceAll = function(pattern, parameters){
+        for(var i in parameters){
+            if($.isArray(parameters[i].query)) continue;
+            pattern = replaceAll(pattern, '{'+i+'}', parameters[i].query);
+        }
+        return pattern;
+    };
+
     var addLabels = function(resultSet) {
         switch (querySet.info.type) {
             case 'single' :
+                label = patternReplaceAll(label,querySet.parameters);
                 $.extend(resultSet.data,{label: label});
                 break;
             case 'matrix' :
-                for (var i in resultSet.data)
-                    for (var j in resultSet.data[i])
-                        $.extend(resultSet.data[i][j],{label: label});
+                var vs1_label = querySet.parameters[querySet.info.p1].label;
+                var vs2_label = querySet.parameters[querySet.info.p2].label;
+                for (var i in resultSet.data) {
+                    for (var j in resultSet.data[i]) {  
+                        var newLabel = patternReplaceAll(label,querySet.parameters);
+                        newLabel = replaceAll(newLabel, '{vs1_label}',vs1_label);
+                        newLabel = replaceAll(newLabel, '{vs1}',i);
+                        newLabel = replaceAll(newLabel, '{'+vs1_label+'}',i);
+                        newLabel = replaceAll(newLabel, '{vs2_label}',vs2_label);
+                        newLabel = replaceAll(newLabel, '{vs2}',j);
+                        newLabel = replaceAll(newLabel, '{'+vs2_label+'}',j);
+                        $.extend(resultSet.data[i][j],{label: newLabel});
+                    }
+                }
                 break;
         }
 
