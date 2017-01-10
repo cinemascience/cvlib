@@ -122,10 +122,10 @@ var UIFactory = {
                     tr.append('<td>'+p.query+'</td><td></td>');
                 } else {
                     var sliderInput = this.createSliderInput(p);
-                    var numberInput = this.createNumberInput(p);
+                    var numberLabel = this.createNumberLabel(p);
                     tr.append(
                         $('<td></td>').append(sliderInput),
-                        $('<td></td>').append(numberInput)
+                        $('<td></td>').append(numberLabel)
                     );
                 }
                 break;
@@ -303,19 +303,19 @@ var UIFactory = {
      * @param {number} value - default value
      * @return {input}
      */
-    createRawNumberInput: function(min, max, value){
+    /*createRawNumberInput: function(min, max, value){
         // return $('<input type="number" min="'+min+'" max="'+max+'" value="'+value+'">');
         // Fix number format
         // return $('<input type="number" value="'+value+'" readonly>');
         return $('<input class="cvlib_numberInput" type="text" value="'+value+'" readonly>');
-    },
+    },*/
 
     /**
      * Creates a number INPUT element for a parameter
      * @param {parameter} p - target of the input widget
      * @return {input}
      */
-    createNumberInput: function(p) {
+    /*createNumberInput: function(p) {
         var input = this.createRawNumberInput(p.values[0], p.values[p.values.length-1], p.query);
 
         input.oldValue = p.query;
@@ -335,6 +335,23 @@ var UIFactory = {
         // }.bind(null, input, p));
 
         return input;
+    },*/
+
+    /**
+     * Creates a number label element for a parameter
+     * @param {parameter} p - target of the input widget
+     * @return {input}
+     */
+    createNumberLabel: function(p) {
+        var label = $('<span class="cvlib_numberLabel">'+p.query+'</span>');
+        label.oldValue = p.query;
+
+        p.emitter.on('change', function(input, e, p) {
+            input.oldValue = p.query;
+            input.text(p.query);
+        }.bind(null, label));
+
+        return label;
     },
 
     /**
@@ -435,19 +452,21 @@ var UIFactory = {
      */
     createMinMaxNumberInput: function(p) {
         var minInput = $('<input type="number" value="0" min="0" max="'+(p.values.length-1)+'" step="1"></input>');
-        var minInputVis = this.createRawNumberInput(0,0,p.query[0]);
+        //var minInputVis = this.createRawNumberInput(0,0,p.query[0]);
+        var minInputVis = $('<span class="cvlib_numberLabel">'+p.query[0]+'</span>');
 
         var maxInput = $('<input type="number" value="0" min="0" max="'+(p.values.length-1)+'" step="1"></input>');
-        var maxInputVis = this.createRawNumberInput(0,0,p.query[0]);
+        //var maxInputVis = this.createRawNumberInput(0,0,p.query[0]);
+        var maxInputVis = $('<span class="cvlib_numberLabel">'+p.query[0]+'</span>');
 
         minInput.on('input', function(){
             var v1 = parseInt(minInput.val());
-            minInputVis.val(p.values[v1]);
+            minInputVis.text(p.values[v1]);
 
             var v2 = parseInt(maxInput.val());
             if(v1>v2){
                 maxInput.val(v1);
-                maxInputVis.val(p.values[v1]);
+                maxInputVis.text(p.values[v1]);
                 v2=v1;
             }
 
@@ -459,12 +478,12 @@ var UIFactory = {
 
         maxInput.on('input', function(){
             var v2 = parseInt(maxInput.val());
-            maxInputVis.val(p.values[v2]);
+            maxInputVis.text(p.values[v2]);
 
             var v1 = parseInt(minInput.val());
             if(v1>v2){
                 minInput.val(v2);
-                minInputVis.val(p.values[v2]);
+                minInputVis.text(p.values[v2]);
                 v1=v2;
             }
 

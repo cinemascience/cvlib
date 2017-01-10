@@ -143,6 +143,12 @@
     text-align: right;
 }
 
+.cvlib_numberLabel {
+    padding-left: 5px;
+    width: 50px;
+    text-align: right;
+}
+
 .cvlib_label {
     position:absolute;
     width:100%;
