@@ -596,12 +596,13 @@ var UIFactory = {
         var ghost = $('<li></li>');
         addDragListeners(ghost);
         targetList.append(ghost);
+        ghost.hide();
 
         var createTargetLi = function(v){
             var li = $('<li draggable="true">'+v+'</li>');
             addDragListeners(li);
             li.on('click', function(e){
-                if(e.which === 2 && targetList.find('li').length>2){
+                if(e.which === 1 && targetList.find('li').length>2){
                     $(this).remove();
                     updateSetInput();
                 }
