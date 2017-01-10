@@ -36,15 +36,12 @@
 
             var renderFunction = function(resultSet){
 
-                viewport.label.contents.remove();
-                viewport.label.contents = $(resultSet.data.label);
-                viewport.label.append(viewport.label.contents);
-                
+                viewport.label.html(resultSet.data.label);  
                 renderer.render(resultSet.data, viewport.canvas, true);
             };
 
             var updateFunction = function(e, parameter){
-                var label = '<div style="margin:10px;color:dimgray;">'+
+                var label = '<div style="margin:10px;">'+
                             '<b>Los Alamos National Laboratory<br>Volume-Render</b><br><br>'+
                             '<font size="2">Phi: {phi}<br>Theta: {theta}</font></div>'
                 db.processQueryWithLabels( querySet, label, renderFunction );

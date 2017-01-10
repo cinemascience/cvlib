@@ -14,9 +14,6 @@ var UIFactory = {
             var canvas = $('<canvas class="cvlib_canvas"></canvas>');
 
             var label = $('<div class="cvlib_label"></div>');
-            var contents = $('<div></div>');
-            label.append(contents);
-            label.contents = contents;
 
             var container = $('<div class="cvlib_canvasContainer"></div>');
             container.append(canvas);
@@ -162,8 +159,8 @@ var UIFactory = {
             map[i] = {};
             for(var j in resultSet.data[i]){
                 var viewport = this.createViewport();
-                if (!(resultSet.data[i][j].hasOwnProperty('label')))
-                    viewport.append('<span>('+i+', '+j+')</span>');    
+                /*if (!(resultSet.data[i][j].hasOwnProperty('label')))
+                    viewport.append('<span>('+i+', '+j+')</span>');    */
                 tr.append( $('<td></td>').append(viewport) );
                 map[i][j] = viewport;
             }

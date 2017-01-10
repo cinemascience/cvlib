@@ -41,16 +41,14 @@
                 for(var i in resultSet.data)
                     for(var j in resultSet.data[i]){
                         var viewport = map[i][j];
-                        viewport.label.contents = $(resultSet.data.label);
-                        viewport.label.append(viewport.label.contents);
-                        viewport.label.append(resultSet.data[i][j].label);
+                        viewport.label.html(resultSet.data[i][j].label);
                         renderer.render(resultSet.data[i][j], viewport.canvas);
                         new CVLIB.ControlsBasic(viewport);
                     }
             };
 
             var updateFunction = function(e){
-                var label = '<div style="margin:10px;color:dimgrey;">'+
+                var label = '<div style="margin:10px;">'+
                             '<b>Los Alamos National Laboratory<br>Cosmology</b><br>'+
                             '<font size="2">Comparing {vs1_label} and {vs2_label}:<br>'+
                             '{vs1_label}: {vs1}<br>{vs2_label}: {vs2}'+
