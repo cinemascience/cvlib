@@ -1,6 +1,6 @@
-.cvlib_canvas {
+/*.cvlib_canvas {
     position:absolute;z-index:0;
-}
+}*/
 
 .cvlib_sidebarLayoutSidebar {
     position: absolute;
@@ -20,8 +20,9 @@
 }
 
 .cvlib_canvasContainer {
+    display: inline-block;
     position:relative;
-    overflow:hidden;
+    /*overflow:hidden;*/
     border:1px solid #ccc;
 }
 
@@ -77,6 +78,7 @@
 .cvlib_matrix td {
     margin:0;
     padding:0;
+    vertical-align: top;
     /*border: 1px solid #ccc;*/
 }
 
@@ -151,6 +153,7 @@
 
 .cvlib_label {
     position:absolute;
+    top:0;
     width:100%;
     height:100%;
     color:gray;

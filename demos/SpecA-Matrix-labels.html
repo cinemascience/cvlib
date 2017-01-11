@@ -48,12 +48,14 @@
             };
 
             var updateFunction = function(e){
-                var label = '<div style="margin:10px;">'+
-                            '<b>Los Alamos National Laboratory<br>Cosmology</b><br>'+
-                            '<font size="2">Comparing {vs1_label} and {vs2_label}:<br>'+
-                            '{vs1_label}: {vs1}<br>{vs2_label}: {vs2}'+
-                            '<div style="position:absolute;bottom:0;">'+
-                            'Time: {time}</font></div></div>'
+                var label = '<div style="position:absolute;top:10px;left:10px">'+
+                                '<b>Los Alamos National Laboratory<br>Cosmology</b><br>'+
+                                '<font size="2">Comparing {vs1_label} and {vs2_label}:<br>'+
+                                '{vs1_label}: {vs1}<br>{vs2_label}: {vs2}'+
+                            '</div>'+
+                            '<div style="position:absolute;bottom:10px;left:10px">'+
+                                'Time: {time}</font>'+
+                            '</div>';
                 db.processQueryWithLabels(querySet, label, renderFunction );
             };
 
