@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <title>Cinema Viewer - Spec A</title>
+    <meta name='description' content='A Cinema Viewer capable of browsing Spec A databases'>
+    <meta name='author' content='Jonas Lukasczyk'>
+    <link rel='stylesheet' href='../css/slick.css'>
+    <script src='../lib/jquery-3.1.1.min.js'></script>
+    <script src='../js/Parameter.js'></script>
+    <script src='../js/QuerySet.js'></script>
+    <script src='../js/ResultSet.js'></script>
+    <script src='../js/UIFactory.js'></script>
+    <script src='../js/ControlsBasic.js'></script>
+    <script src='../js/Database.js'></script>
+    <script src='../js/DatabaseSpecA.js'></script>
+    <script src='../js/Renderer.js'></script>
+    <script src='../js/RendererSpecA.js'></script>
+</head>
+<body>
+    <script>
+        var db = new CVLIB.DatabaseSpecA('data/magnitude-volume-halos-time/info.json', function(querySet){
+            var sidebarLayout = CVLIB.UIFactory.createSidebarLayout();
+            var queryTable = CVLIB.UIFactory.createVersusQueryTable( querySet );
+            sidebarLayout.sidebar.append(queryTable);
+            sidebarLayout.content.remove();
+
+            var controlPanel = $('<div class="controlPanel"></div>');
+
+            var panelToggle = $('<div class="panelToggle">Hide Controls</div>');
+            var controlsVisible = true;
+            panelToggle.click(function(e){
+                sidebarLayout.sidebar.slideToggle();
+                controlsVisible = !controlsVisible;
+                if (controlsVisible)
+                    panelToggle.text("Hide Controls");
+                else
+                    panelToggle.text("Show Controls");
+            });
+
+            controlPanel.append(sidebarLayout.sidebar);
+            controlPanel.append(panelToggle);
+            $('body').append(controlPanel);
+
+            panelToggle.width(sidebarLayout.sidebar.width());
+
+            var matrix = null;
+            var renderer = new CVLIB.RendererSpecA();
+
+            var renderFunction = function(resultSet){
+                if(matrix)
+                    matrix.remove();
+
+                matrix = CVLIB.UIFactory.createMatrix(resultSet);
+                //sidebarLayout.content.append( matrix );
+                $('body').append(matrix);
+
+                var map = matrix.viewportMap;
+                var x = 0;
+                for(var i in resultSet.data) {
+                    for(var j in resultSet.data[i]){
+                        var viewport = map[i][j];
+                        viewport.label.html(resultSet.data[i][j].label);
+                        renderer.render(resultSet.data[i][j], viewport.canvas);
+                        new CVLIB.ControlsBasic(viewport);
+                        //viewport.css({opacity : '0.0'}).delay(x*100).animate({opacity : '1.0'})
+                        viewport.hide().delay(x*150).animate({height : 'toggle', opacity : 'toggle'}, 150);
+                        x++;
+                    }
+                }
+            };
+
+            var updateFunction = function(e){
+                var label = '<div style="position:absolute;top:10px;left:10px">'+
+                                '<b>Los Alamos National Laboratory<br>Cosmology</b><br>'+
+                                '<font size="2">Comparing {vs1_label} and {vs2_label}:<br>'+
+                                '{vs1_label}: {vs1}<br>{vs2_label}: {vs2}'+
+                            '</div>'+
+                            '<div style="position:absolute;bottom:10px;left:10px">'+
+                                'Time: {time}</font>'+
+                            '</div>';
+                db.processQueryWithLabels(querySet, label, renderFunction );
+            };
+
+            var loadButton = $('<button>Load</button>');
+            loadButton.on('click', updateFunction);
+            queryTable.find('tr:first td').append(loadButton);
+        });
+    </script>
+</body>
+</html>

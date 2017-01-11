@@ -1,0 +1,95 @@
+@import 'cvlib.css';
+
+body {
+    background: radial-gradient(circle, #222222 25%, #111111 60%);
+    color: white;
+    font-family: "arial", "sans-serif";
+}
+
+html {
+    height: 100%
+}
+
+.cvlib_canvas {
+    border-radius: 5px;
+}
+
+.cvlib_canvasContainer {
+    border: initial;
+}
+
+.controlPanel {
+    position: fixed;
+    z-index: 999;
+    top: 0px;
+    right: 30px;
+}
+
+.panelToggle {
+    cursor: pointer;
+    color: black;
+    padding: 5px 0px 5px 0px;
+    text-align: center;
+    background-color: #eee;
+    border-radius: 0px 0px 10px 10px;
+}
+
+.panelToggle:hover {
+    background-color: lightgray;
+}
+
+.cvlib_sidebarLayoutSidebar {
+    position: initial;
+    background-color: rgba(0,0,0,0.75);
+}
+
+.cvlib_matrix {
+    border-collapse:separate;
+}
+
+.cvlib_matrix td {
+    padding: 10px;
+}
+
+.cvlib_setInput li {
+    margin-top: 0px;
+}
+
+.cvlib_setInput li:hover {
+    background-color: white;
+    color: black;
+}
+
+.cvlib_setInput ul {
+    border-radius: 4px;
+}
+
+input[type=number], select, button {
+    font-size: 16px;
+    color: white;
+    padding: 3px;
+    background-color: black;
+    border: 1px solid white;
+    border-radius: 4px;
+}
+
+input[type=range]::-moz-range-track,
+/*input[type=range]::-webkit-slider-runnable-track,*/
+input[type=range]::-ms-track {
+    background: white;
+    border-radius: 2px;
+}
+
+button {
+    margin: 0px 0px 0px 10px;
+}
+
+button:hover {
+    color: black;
+    background-color: white;
+}
+
+button:active {
+    background-color: lightgray;
+    border-color: lightgray;
+}
