@@ -153,6 +153,10 @@ DatabaseSpecA.prototype.processQuery = function(querySet, callback){
         return pattern;
     };
 
+    var replaceAll = function(string, search, replacement) {
+        return string.split(search).join(replacement);
+    }
+
     var pattern = this.json.name_pattern;
     var dir = this.json.databaseDir;
     var resultSet;
@@ -193,8 +197,39 @@ DatabaseSpecA.prototype.processQuery = function(querySet, callback){
                 data
             );
             break;
+        case 'search' :
+            var parameters = querySet.parameters;
+            var count = Object.keys(parameters).length;
+            var data = {};
+            var results = 0;
+            //Recursive function: Iterates through all combinations of queries and adds to the resultSet.
+            //Also stores values of each parameter with each result.
+            var addResultsFromParam = function(index, values) {
+                var p = parameters[Object.keys(parameters)[index]];
+                for (var q in p.query) {
+                    var newValues = $.extend({}, values);
+                    newValues[p.label] = p.query[q];
+                    if (index === count-1) {
+                        var path = pattern;
+                        for (var val in newValues)
+                            path = replaceAll(path, '{'+val+'}',newValues[val]);
+                        data[results] = { type: 'image', src: dir + path, values: newValues };
+                        results++;
+                    }
+                    else {
+                        addResultsFromParam(index+1, newValues);
+                    }
+                }
+            };
+            addResultsFromParam(0,pattern);
+
+            resultSet = new CVLIB.ResultSet(
+                querySet.serialize(),
+                data
+            );
+            break;
         default:
-            console.error('Unsupported Mode');
+            console.error('Unsupported Mode: ' + querySet.info.type);
             return;
     }
 
@@ -246,6 +281,16 @@ DatabaseSpecA.prototype.processQueryWithLabels = function(querySet, label, callb
                         newLabel = replaceAll(newLabel, '{'+vs2_label+'}',j);
                         $.extend(resultSet.data[i][j],{label: newLabel});
                     }
+                }
+                break;
+            case 'search' :
+                for (var i in resultSet.data) {
+                    var newLabel = label;
+                    for (var value in resultSet.data[i].values) {
+                        newLabel = replaceAll(newLabel, '{'+value+'}',resultSet.data[i].values[value]);
+                    }
+                    newLabel = replaceAll(newLabel, '{result}', i);
+                    $.extend(resultSet.data[i],{label: newLabel});
                 }
                 break;
         }

@@ -17,12 +17,13 @@ var UIFactory = {
 
             var container = $('<div class="cvlib_canvasContainer"></div>');
             container.append(canvas);
+            //container.append('<div style="background-color:darkred;width:500px;height:500px"></div>');
             container.append(label);
 
-            canvas.on('resized', function(canvas, container){
+            /*canvas.on('resized', function(canvas, container){
                 container.width(canvas.width());
                 container.height(canvas.height());
-            }.bind(null, canvas, container));
+            }.bind(null, canvas, container));*/
 
             container.canvas = canvas;
             container.label = label;
@@ -272,6 +273,30 @@ var UIFactory = {
         };
 
         updateTable();
+
+        return table;
+    },
+
+    /**
+     * Creates a TABLE element with multiple-value input widgets for all parameters
+     * @param {QuerySet} querySet - Its parameters will be the targets of the input widgets
+     * @return {table}
+     */
+    createSearchQueryTable: function(querySet) {
+        var tr, table = $('<table class="cvlib_queryTable"></table>');
+
+        var p,i;
+        for (i in querySet.parameters) {
+            p = querySet.parameters[i];
+            p.query = [p.values[0]];
+            table.append(this.createVariableRow(p));
+        }
+
+        table.prepend(
+            $('<tr></tr>').append('<td colspan=4></td>')
+        );
+
+        querySet.info = {type : 'search'};
 
         return table;
     },

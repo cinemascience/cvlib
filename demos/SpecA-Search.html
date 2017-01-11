@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <title>Cinema Viewer - Spec A</title>
+    <meta name='description' content='A Cinema Viewer capable of browsing Spec A databases'>
+    <meta name='author' content='Jonas Lukasczyk'>
+    <link rel='stylesheet' href='../css/cvlib.css'>
+    <script src='../lib/jquery-3.1.1.min.js'></script>
+    <script src='../js/Parameter.js'></script>
+    <script src='../js/QuerySet.js'></script>
+    <script src='../js/ResultSet.js'></script>
+    <script src='../js/UIFactory.js'></script>
+    <script src='../js/ControlsBasic.js'></script>
+    <script src='../js/Database.js'></script>
+    <script src='../js/DatabaseSpecA.js'></script>
+    <script src='../js/Renderer.js'></script>
+    <script src='../js/RendererSpecA.js'></script>
+</head>
+<body>
+    <script>
+        var db = new CVLIB.DatabaseSpecA('data/magnitude-volume-halos-time/info.json', function(querySet){
+            var sidebarLayout = CVLIB.UIFactory.createSidebarLayout();
+            sidebarLayout.sidebar.append( '<h2>Cinema Viewer<br>Spec A - Search</h2>' );
+            var queryTable = CVLIB.UIFactory.createSearchQueryTable( querySet );
+            sidebarLayout.sidebar.append(queryTable);
+
+            $('body').append( sidebarLayout );
+
+            var renderer = new CVLIB.RendererSpecA();
+
+            var resultsContainer = null;
+
+            var renderFunction = function(resultSet){
+                if (resultsContainer)
+                    resultsContainer.remove();
+
+                resultsContainer = $('<div></div>');
+
+                for (var i in resultSet.data) {
+                    var viewport = CVLIB.UIFactory.createViewport();
+                    viewport.label.html(resultSet.data[i].label);
+                    renderer.render(resultSet.data[i], viewport.canvas);
+                    resultsContainer.append(viewport);
+                }
+                sidebarLayout.content.append(resultsContainer);
+            };
+
+            var updateFunction = function(e){
+                var label = '<div style="position:absolute;top:10px;left:10px">'+
+                                'Result Number: {result}<br><font size="2">'+
+                                'Phi: {phi}<br>'+
+                                'Theta: {theta}<br>'+
+                                'Time: {time}<br>'+
+                                'VolumeIdx: {volumeIdx}<br>'+
+                                'Volume: {volume}<br>'+
+                                'Halos: {halos}<br>'+
+                            '</div>';
+                db.processQueryWithLabels(querySet, label, renderFunction );
+            };
+
+            var searchButton = $('<button>Search</button>');
+            searchButton.on('click', updateFunction);
+            queryTable.find('tr:first td').append(searchButton);
+        });
+    </script>
+</body>
+</html>
