@@ -23,8 +23,11 @@ RendererSpecA.prototype.render = function(element, canvasJQ, abortOld){
     var canvas = canvasJQ[0];
     switch (element.type) {
         case 'image':
-            if(element.hasOwnProperty('img'))
+            if(element.hasOwnProperty('img')) {
+                canvas.width = element.img.width;
+                canvas.height = element.img.height;
                 canvas.getContext('2d').drawImage(element.img, 0, 0);
+            }
             else {
                 this.imageLoader.ignore = abortOld;
                 this.imageLoader = document.createElement('img');

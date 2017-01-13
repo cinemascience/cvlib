@@ -1,0 +1,177 @@
+/**
+* CSS for advanced search page. Adds onto and overrides parts of cvlib.css
+*/
+
+@import 'cvlib.css';
+
+body {
+    font-family: "arial", "sans-serif";
+    background-color: gray;
+}
+
+h1 {
+    margin: 0;
+    padding: 20px;
+    width: 100%;
+    top: 0;
+    color: white;
+    background-color: green;
+    border-bottom: 10px solid darkgreen;
+}
+
+.header {
+    z-index: 2;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    border-bottom: 5px solid lightgray;
+    background-color: white;
+    padding-bottom: 20px;
+    box-shadow: 0 10px 10px dimgray;
+}
+
+.cvlib_searchContainer {
+    width: 50%;
+    margin: auto;
+    display: flex;
+    align-items: baseline;
+    flex-flow: row wrap;
+    flex-direction: row;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.cvlib_searchBar {
+    margin: initial;
+    display: inline-flex;
+    flex: 1;
+    font-family: "Menlo", "Monaco", "Courier New", "monospace";
+    width: 100%;
+    font-size: 18px;
+    padding: 8px;
+    border: 3px solid lightgray;
+    border-radius: 5px;
+    text-align: left;
+    -webkit-transition: border 0.4s;
+    transition: border 0.4s;
+}
+.cvlib_searchBar:hover {
+    border: 3px solid gray;
+}
+.cvlib_searchBar:focus {
+    border: 3px solid black;
+}
+
+.cvlib_searchMessage {
+    text-align: left;
+    width: 50%;
+    margin: auto;
+    max-width: initial;
+    font-weight: bold;
+    font-size: 20px;
+}
+.cvlib_searchMessage[mode='error'] {
+    color: red;
+}
+.cvlib_searchMessage[mode='done'] {
+    color: limegreen;
+}
+
+.searchButton {
+    flex: initial;
+    color: white;
+    background-color: green;
+    border-radius: 8px;
+    border: 2px solid darkgreen;
+    box-shadow: 0 3px darkgreen;
+    padding: 5px;
+    margin-left: 10px;
+    font-size: 20px;
+}
+.searchButton:hover {
+    background-color: darkgreen;
+}
+.searchButton:active {
+    box-shadow: 0 1px darkgreen;
+    transform: translateY(3px);
+}
+
+.searchOptionsContainer {
+    position: absolute;
+    bottom: 10px;
+    right: 20px;
+    max-width: 200px;
+    text-align: right;
+    line-height: 25px;
+}
+
+.cvlib_canvasContainer {
+    margin: 10px;
+    border: 10px solid black;
+    border-radius: 10px;
+    box-shadow: 10px 10px 10px dimgray;
+    transition: box-shadow 0.5s, transform 0.5s;
+    -webkit-transition: box-shadow 0.5s, transform 0.5s;
+}
+.cvlib_canvasContainer:hover {
+    box-shadow: 15px 15px 15px #333;
+    transform: translateY(-15px);
+}
+
+.cvlib_canvas {
+    max-width: 350px;
+}
+
+.pageNav {
+    padding: initial;
+    z-index: 2;
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%,-50%);
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 3px 3px 10px dimgray;
+}
+
+.pageButton {
+    cursor: pointer;
+    color: dimgray;
+    border-radius: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    display: inline-flex;
+    background-color: white;
+    padding: 10px;
+}
+.pageButton[mode='default']:hover {
+    background-color: #eee;
+}
+.pageButton[mode='selected'] {
+    color: white;
+    background-color: green;
+}
+
+.modalBackground {
+    position: fixed;
+    z-index: 3;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.9);
+}
+
+.modalCanvas {
+    border-radius: 10px;
+    max-width: initial;
+    margin: auto;
+    display: block;
+}
+

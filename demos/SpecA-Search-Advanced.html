@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <title>Cinema Viewer - Spec A</title>
+    <meta name='description' content='A Cinema Viewer capable of browsing Spec A databases'>
+    <meta name='author' content='Cameron Tauxe'>
+    <link rel='stylesheet' href='../css/advancedSearch.css'>
+    <script src='../lib/jquery-3.1.1.min.js'></script>
+    <script src='../js/Parameter.js'></script>
+    <script src='../js/QuerySet.js'></script>
+    <script src='../js/ResultSet.js'></script>
+    <script src='../js/UIFactory.js'></script>
+    <script src='../js/ControlsBasic.js'></script>
+    <script src='../js/Database.js'></script>
+    <script src='../js/DatabaseSpecA.js'></script>
+    <script src='../js/Renderer.js'></script>
+    <script src='../js/RendererSpecA.js'></script>
+    <script src='../js/SearchUtil.js'></script>
+</head>
+<body>
+    <script>
+        var db = new CVLIB.DatabaseSpecA('data/magnitude-volume-halos-time/info.json', function(querySet){
+
+            //Create header with title, search bar and search options
+            var header = $('<div class="header"></div>');
+            var headerText = $('<h1>Cinema Spec A - Search</h1>');
+            var searchBar = CVLIB.UIFactory.createSearchBar(querySet);
+            var searchMessage = searchBar.message;
+            searchMessage.remove(); //remove message from searchBar to be added later as a sibling
+
+            //Create search options
+            var searchOptionsContainer = $('<div class="searchOptionsContainer"></div>');
+            //Create selection box to specify how to sort results
+            var sortSelectionContainer = $('<div class="sortSelectionContainer"></div>');
+            var sortSelectionLabel = $('<span class="sortSelectionLabel">Sort results by: </span>');
+            var sortSelection = CVLIB.UIFactory.createRawSelectInput(Object.keys(querySet.parameters));
+            sortSelection.addClass('sortSelection');
+            sortSelectionContainer.append(sortSelectionLabel,sortSelection);
+            //Create checkbox to reverse order of results
+            var reverseSortBox = $('<input type="checkbox" class="reverseSortBox">Reverse order</input>');
+            //Create selection box to specify results shown per page
+            var resultsPerPageContainer = $('<div class="resultsPerPageContainer"></div>');
+            var resultsPerPageLabel = $('<span class="resultsPerPageLabel">Results per page: </span>')
+            var resultsPerPageSelection = $('<select class="resultsPerPageSelection"></select>');
+            for (var i = 25; i <= 200; i *= 2) { //Add options to selection (set default to 50)
+                var option = $('<option value="'+i+'" class="resultsPerPageOptions">'+i+'</option>');
+                if (i == 50)
+                    option.attr('selected','selected');
+                resultsPerPageSelection.append(option);
+            }
+            resultsPerPageContainer.append(resultsPerPageLabel, resultsPerPageSelection);
+            //Add controls to search options container
+            searchOptionsContainer.append(sortSelectionContainer,reverseSortBox,resultsPerPageContainer);
+            //Add header items and searh options to header, then add to body
+            header.append(headerText, searchBar, searchMessage, searchOptionsContainer).appendTo('body');
+
+            //Store results information
+            var results;
+            var resultsPerPage = resultsPerPageSelection.val();
+            var currentPage = 1;
+            
+            //DOM used in displaying results
+            var resultsContainer = null;
+            var renderer = new CVLIB.RendererSpecA();
+
+            //Create a page of results according to the result data and selected page
+            var renderFunction = function(){
+                if (resultsContainer) //Remove and re-create resultsContainer if it's already there
+                    resultsContainer.remove();
+                resultsContainer = $('<div class="resultsContainer"></div>');
+
+                //Iterate through results and add viewports to page
+                for (var i = 0 + ((currentPage-1)*resultsPerPage);
+                        i < currentPage*resultsPerPage && i < results.count;
+                        i++) {
+                    var viewport = CVLIB.UIFactory.createViewport();
+                    viewport.label.html(results.data[i].label);
+                    renderer.render(results.data[i], viewport.canvas);
+                    resultsContainer.append(viewport);
+                    //Animate viewport appearing on page
+                    viewport.hide().delay((i)*100).animate({opacity : 'toggle'}, 200);
+
+                    //Create a modal to display image when viewport is clicked
+                    viewport.on('click', function(){
+                        var modal = $('<div class="modalBackground"></div>');
+                        var canvas = $(this).find('.cvlib_canvas').clone().addClass('modalCanvas').appendTo(modal)[0];
+                        canvas.getContext('2d').drawImage($(this).find('.cvlib_canvas')[0],0,0);
+                        modal.on('click', function(){
+                            $(this).remove();
+                        });
+                        $('body').append(modal);
+                    });
+                }
+                //Add results container to body
+                resultsContainer.css({position : 'absolute', top : header.height()+50}).appendTo('body');
+            };
+
+            //Recalculate the number of pages needed and re-create the pageNav widget accordingly
+            var updatePagesFunction = function() {
+                currentPage = 1;
+                $('.pageNav').remove();
+                if (results.count > resultsPerPage) {
+                    var pageNav = $('<ul class="pageNav"></ul>');
+                    var numPages = Math.floor(results.count / resultsPerPage);
+                    if (results.count % resultsPerPage > 0)
+                        numPages += 1;
+                    //Create a pageButton for every page
+                    for (var i = 1; i <= numPages; i++) {
+                        var pageButton = $('<li class="pageButton">'+i+'</li>');
+                        if (i == 1)
+                            pageButton.attr('mode', 'selected');
+                        else
+                            pageButton.attr('mode', 'default');
+                        //pageButton changes selected page and re-renders results when clicked
+                        pageButton.on('click', function(e){
+                            if ($(this).attr('mode')!='selected') {
+                                currentPage = parseInt($(this).text());
+                                $('.pageButton[mode=selected]').attr('mode', 'default');
+                                $(this).attr('mode', 'selected');
+                                renderFunction();
+                            }
+                        });
+                        pageNav.append(pageButton);
+                    }
+                    $('body').append(pageNav);
+                }
+            };
+
+            //Re-order the results by the given Parameter
+            var sortResultsByParam = function(param) {
+                if (results) {
+                    results.data.sort(function(a,b) {
+                        var aIndex = param.values.findIndex(function(val){return val == a.values[param.label];});
+                        var bIndex = param.values.findIndex(function(val){return val == b.values[param.label];});
+                        return aIndex - bIndex;
+                    });
+                }
+            };
+
+            //Create labels, process search query and recreate results
+            var processSearchFunction = function(e){
+                var label = '<div style="position:absolute;top:10px;left:10px">'+
+                                '<font size="1">Result Number: {result}<br>'+
+                                'Phi: {phi}<br>'+
+                                'Theta: {theta}<br>'+
+                                'Time: {time}<br>'+
+                                'VolumeIdx: {volumeIdx}<br>'+
+                                'Volume: {volume}<br>'+
+                                'Halos: {halos}<br>'+
+                            '</div>';
+
+                db.processQueryWithLabels(querySet, label, function(resultSet) {
+                    results = resultSet;
+                    $.extend(results, {count : results.data.length});
+                    searchMessage.text(results.count + " results found!");
+                    searchMessage.attr('mode', 'done');
+                    //Sort results (reverse if necessary), update the pages and renderr
+                    sortResultsByParam(querySet.parameters[sortSelection.val()]);
+                    if (reverseSortBox.is(':checked'))
+                        results.data.reverse();
+                    updatePagesFunction();
+                    renderFunction();
+                });
+            };
+
+            //Add listener to sortSelection to re-sort results when changed
+            sortSelection.on('change', function(){
+                if (results) {
+                    sortResultsByParam(querySet.parameters[sortSelection.val()]);
+                    if (reverseSortBox.is(':checked'))
+                        results.data.reverse();
+                    renderFunction();
+                }
+            });
+
+            //Add listener to reverseSortBox to reverse the order of results when changed
+            reverseSortBox.on('change', function() {
+                if (results) {
+                    results.data.reverse();
+                    renderFunction();
+                }
+            });
+
+            //Add listener to resultsPerPageSelection to update pages when changed
+            resultsPerPageSelection.on('change', function(){
+                resultsPerPage = resultsPerPageSelection.val();
+                if (results) {
+                    updatePagesFunction();
+                    renderFunction();
+                }
+            });
+
+            //Add search button that calls processSearchFunction when pressed.
+            var searchButton = $('<button class="searchButton">Search</button>');
+            searchButton.on('click', processSearchFunction);
+            searchButton.insertAfter('.cvlib_searchBar');
+
+        });
+    </script>
+</body>
+</html>

@@ -200,21 +200,19 @@ DatabaseSpecA.prototype.processQuery = function(querySet, callback){
         case 'search' :
             var parameters = querySet.parameters;
             var count = Object.keys(parameters).length;
-            var data = {};
-            var results = 0;
+            var data = [];
             //Recursive function: Iterates through all combinations of queries and adds to the resultSet.
             //Also stores values of each parameter with each result.
             var addResultsFromParam = function(index, values) {
                 var p = parameters[Object.keys(parameters)[index]];
                 for (var q in p.query) {
-                    var newValues = $.extend({}, values);
+                    var newValues = $.extend({}, values);//Copy values into newValues
                     newValues[p.label] = p.query[q];
                     if (index === count-1) {
                         var path = pattern;
                         for (var val in newValues)
                             path = replaceAll(path, '{'+val+'}',newValues[val]);
-                        data[results] = { type: 'image', src: dir + path, values: newValues };
-                        results++;
+                        data.push({ type: 'image', src: dir + path, values: newValues });
                     }
                     else {
                         addResultsFromParam(index+1, newValues);
@@ -271,7 +269,9 @@ DatabaseSpecA.prototype.processQueryWithLabels = function(querySet, label, callb
                 var vs1_label = querySet.parameters[querySet.info.p1].label;
                 var vs2_label = querySet.parameters[querySet.info.p2].label;
                 for (var i in resultSet.data) {
-                    for (var j in resultSet.data[i]) {  
+                    for (var j in resultSet.data[i]) {
+                        //The tags {vs1},{vs2},{vs1_label} and {vs2_label} are
+                        //replaced with values related to the two parameters being compared
                         var newLabel = patternReplaceAll(label,querySet.parameters);
                         newLabel = replaceAll(newLabel, '{vs1_label}',vs1_label);
                         newLabel = replaceAll(newLabel, '{vs1}',i);
@@ -289,6 +289,7 @@ DatabaseSpecA.prototype.processQueryWithLabels = function(querySet, label, callb
                     for (var value in resultSet.data[i].values) {
                         newLabel = replaceAll(newLabel, '{'+value+'}',resultSet.data[i].values[value]);
                     }
+                    //The tag {result} is replaced the result number of this data point
                     newLabel = replaceAll(newLabel, '{result}', i);
                     $.extend(resultSet.data[i],{label: newLabel});
                 }

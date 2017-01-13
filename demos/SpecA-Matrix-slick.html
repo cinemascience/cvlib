@@ -4,7 +4,7 @@
     <meta charset='utf-8'>
     <title>Cinema Viewer - Spec A</title>
     <meta name='description' content='A Cinema Viewer capable of browsing Spec A databases'>
-    <meta name='author' content='Jonas Lukasczyk'>
+    <meta name='author' content='Cameron Tauxe'>
     <link rel='stylesheet' href='../css/slick.css'>
     <script src='../lib/jquery-3.1.1.min.js'></script>
     <script src='../js/Parameter.js'></script>
@@ -52,7 +52,6 @@
                     matrix.remove();
 
                 matrix = CVLIB.UIFactory.createMatrix(resultSet);
-                //sidebarLayout.content.append( matrix );
                 $('body').append(matrix);
 
                 var map = matrix.viewportMap;
@@ -63,7 +62,6 @@
                         viewport.label.html(resultSet.data[i][j].label);
                         renderer.render(resultSet.data[i][j], viewport.canvas);
                         new CVLIB.ControlsBasic(viewport);
-                        //viewport.css({opacity : '0.0'}).delay(x*100).animate({opacity : '1.0'})
                         viewport.hide().delay(x*150).animate({height : 'toggle', opacity : 'toggle'}, 150);
                         x++;
                     }

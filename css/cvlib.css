@@ -1,6 +1,6 @@
-/*.cvlib_canvas {
-    position:absolute;z-index:0;
-}*/
+.cvlib_canvas {
+    display: block;
+}
 
 .cvlib_sidebarLayoutSidebar {
     position: absolute;
@@ -121,6 +121,28 @@
 
 .cvlib_setInput li:hover {
     background-color: #eee;
+}
+
+
+
+.cvlib_searchBar {
+    width: 90%;
+    margin: 5px;
+}
+
+.cvlib_searchMessage {
+    margin: 5px;
+    max-width: 300px
+}
+
+.cvlib_searchMessage[mode="error"] {
+    color: darkred;
+}
+.cvlib_searchMessage[mode="valid"] {
+    color: green;
+}
+.cvlib_searchMessage[mode="waiting"] {
+    color: black;
 }
 
 .cvlib_loadingBar {

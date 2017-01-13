@@ -17,7 +17,6 @@ var UIFactory = {
 
             var container = $('<div class="cvlib_canvasContainer"></div>');
             container.append(canvas);
-            //container.append('<div style="background-color:darkred;width:500px;height:500px"></div>');
             container.append(label);
 
             /*canvas.on('resized', function(canvas, container){
@@ -316,6 +315,173 @@ var UIFactory = {
         }
 
         return table;
+    },
+
+    /**
+     * Creates a DIV element with a searchBar and message to enter text to search querySet
+     * @param {QuerySet} querySet
+     * @return {div}
+     */
+    createSearchBar: function(querySet) {
+        var searchContainer = $('<div class="cvlib_searchContainer"></div>');
+        var searchBar = $('<input type="text" class="cvlib_searchBar"></div>');
+        var searchMessage = $('<div class="cvlib_searchMessage"></div>');
+
+        searchContainer.append(searchBar);
+        searchContainer.append(searchMessage);
+
+        searchContainer.bar = searchBar;
+        searchContainer.message = searchMessage;
+
+        //Parse text in search bar and set parameter queries accordingly
+        var updateSearch = function() {
+            //Reset parameter queries
+            var usedParams = {}; //keeps track of which parameters have been specified in the search
+            for (var i in querySet.parameters) {
+                p = querySet.parameters[i];
+                p.query = {};
+                usedParams[p.label] = false;
+            }
+
+            if (searchBar.val().length === 0) {
+                searchMessage.text('Please enter search terms separated by a semicolon \';\'.');
+                searchMessage.attr('mode', 'waiting');
+                return;
+            }
+            //Split into search terms and parse one-by-one
+            var terms = searchBar.val().split(';');
+            for (var term in terms) {
+                term = terms[term];
+                term = term.trim();
+                //Parse parameter
+                var foundParam = null;
+                for (var i in querySet.parameters) {
+                    if (term.startsWith(querySet.parameters[i].label))
+                        foundParam = querySet.parameters[i];
+                }
+                if (!foundParam) { //Error message if text does not match any parameters
+                    var message = "Unrecognized parameter. Allowed values are: ";
+                    for (var i in querySet.parameters)
+                        message += ("\'"+querySet.parameters[i].label+"\', ");
+                    searchMessage.text(message);
+                    searchMessage.attr('mode', 'error');
+                    return;
+                }
+                usedParams[foundParam.label] = true;
+                //Parse operator and values
+                term = term.substring(foundParam.label.length,term.length);
+                term = term.trim();
+                var operator = term.substr(0,2); //operator is always two characters
+                term = term.substring(2,term.length);
+                term = term.trim();
+                switch (operator) {
+                    //Equals. Iterates through comma separated values and adds them to the parameter's query
+                    case '==' :
+                        var values = term.split(',');
+                        var valuesCount = 0;
+                        //Iterate through listed values
+                        for (var val in values) {
+                            val = values[val];
+                            val = val.trim();
+                            var foundVal = false;
+                            //Iterate through parameter values until one matching the text is found
+                            for (var i in foundParam.values) {
+                                if (val == foundParam.values[i].toString()) {
+                                    foundParam.query[valuesCount] = foundParam.values[i];
+                                    valuesCount++;
+                                    foundVal = true;
+                                }
+                            }
+                            if (!foundVal) { //Error if no matching value is found
+                                var message = "Unrecognized value: \'"+val+"\'. Allowed values are: ";
+                                for (var i in foundParam.values)
+                                    message += ("\'"+foundParam.values[i]+"\', ");
+                                message += ("(comma separated)");
+                                searchMessage.text(message);
+                                searchMessage.attr('mode', 'error');
+                                return;
+                            }
+                        }
+                        break;
+                    //Greater than. Adds given value and all values after it to parameter's query
+                    case '>=' :
+                        var foundVal = null;
+                        var foundValIndex;
+                        //Iterate through parameter values until one matching the text is found
+                        for (var i in foundParam.values) {
+                            if (term == foundParam.values[i].toString()) {
+                                foundVal = foundParam.values[i];
+                                foundValIndex = i;
+                            }
+                        }
+                        if (foundVal == null) { //Error if no matching value is found
+                            var message = "Unrecognized value: \'"+term+"\'. Allowed values are: ";
+                            for (var i in foundParam.values)
+                                message += ("\'"+foundParam.values[i]+"\', ");
+                            searchMessage.text(message);
+                            searchMessage.attr('mode', 'error');
+                            return;
+                        }
+                        //Add to query
+                        var query = [];
+                        for (var i = foundParam.values.length-1; i >= foundValIndex; i--)
+                            query.push(foundParam.values[i]);
+                        foundParam.setValue(query);
+                        break;
+                    //Less than. Adds given value and all values before it to parameter's query
+                    case '<=' :
+                        var foundVal = null;
+                        var foundValIndex;
+                        //Iterate through parameter values until one matching the text is found
+                        for (var i in foundParam.values) {
+                            if (term == foundParam.values[i].toString()) {
+                                foundVal = foundParam.values[i];
+                                foundValIndex = i;
+                            }
+                        }
+                        if (foundVal == null) { //Error if no matching value is found
+                            var message = "Unrecognized value: \'"+term+"\'. Allowed values are: ";
+                            for (var i in foundParam.values)
+                                message += ("\'"+foundParam.values[i]+"\', ");
+                            searchMessage.text(message);
+                            searchMessage.attr('mode', 'error');
+                            return;
+                        }
+                        //Add to query
+                        var query = [];
+                        for (var i = 0; i <= foundValIndex; i++)
+                            query.push(foundParam.values[i]);
+                        foundParam.setValue(query);
+                        break;
+                    default:
+                        searchMessage.text("Unrecognized operator: \'"+operator+"\'. Allowed values are: \'==\', \'>=\', \'<=\'");
+                        searchMessage.attr('mode', 'error');
+                    return;
+                } //End switch
+            } //End for loop (terms)
+            //Fill queries for unspecified parameters
+            for (var i in querySet.parameters) {
+                var p = querySet.parameters[i];
+                if (!usedParams[p.label]) {
+                    for (var j in p.values)
+                        p.query[j] = p.values[j];
+                }
+            }
+            //Estimate number of results
+                var resultsCount = 1;
+                for (var i in querySet.parameters)
+                    resultsCount *= Object.keys(querySet.parameters[i].query).length;
+                searchMessage.text("Estimated number of results: " + resultsCount);
+                searchMessage.attr('mode', 'valid');
+        }; //End updateSearch
+
+        querySet.info = {type : 'search'};
+
+        searchBar.on('input', updateSearch);
+
+        updateSearch();
+
+        return searchContainer;
     },
 
     /**
