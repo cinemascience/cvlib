@@ -70,6 +70,7 @@
                 resultsContainer = $('<div class="resultsContainer"></div>');
 
                 //Iterate through results and add viewports to page
+                x = 0;
                 for (var i = 0 + ((currentPage-1)*resultsPerPage);
                         i < currentPage*resultsPerPage && i < results.count;
                         i++) {
@@ -78,7 +79,7 @@
                     renderer.render(results.data[i], viewport.canvas);
                     resultsContainer.append(viewport);
                     //Animate viewport appearing on page
-                    viewport.hide().delay((i)*100).animate({opacity : 'toggle'}, 200);
+                    viewport.hide().delay((x++)*100).animate({opacity : 'toggle'}, 200);
 
                     //Create a modal to display image when viewport is clicked
                     viewport.on('click', function(){
