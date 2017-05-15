@@ -226,6 +226,24 @@ DatabaseSpecA.prototype.processQuery = function(querySet, callback){
                 data
             );
             break;
+        case 'compare' :
+            var parameters = querySet.parameters;
+            var basePattern = patternReplace(pattern, querySet.parameters);
+            var p = querySet.info.p;
+            var q = parameters[p].query;
+            var data = {};
+            for (i in q) {
+                data[i] = {
+                    type: "image",
+                    src: dir + basePattern.replace('{'+p+'}', q[i])
+                };
+            }
+
+            resultSet = new CVLIB.ResultSet(
+                querySet.serialize(),
+                data
+            );
+            break;
         default:
             console.error('Unsupported Mode: ' + querySet.info.type);
             return;

@@ -96,6 +96,18 @@ var UIFactory = {
         return tr;
     },
 
+    createMultiValueRow: function(p) {
+        var tr = $('<tr id="cvlib_row_'+p.label+'" class="cvlib_multiValueRow"></tr>');
+
+        // Add Label
+        var label = $('<td>' + p.label + '</td>');
+        tr.append(label);
+
+        tr.append( $('<td colspan=2></td>').append(this.createMultiValueInput(p)));
+
+        return tr;
+    },
+
     /**
      * Creates a TR element with single-value input widgets for a parameter
      * @param {parameter} p - parameter object
@@ -269,6 +281,72 @@ var UIFactory = {
             type: 'matrix',
             p1: null,
             p2: null,
+        };
+
+        updateTable();
+
+        return table;
+    },
+
+    /**
+     * Creates a TABLE element with multiple-value input widgets for one parameter and single-value widgets for the others based on a querySet
+     * @param {QuerySet} querySet - contains parameters used to generate the table
+     * @return {table}
+     */
+    createCompareQueryTable: function(querySet){
+        var table = this.createSimpleQueryTable(querySet);
+
+        var parameters = Object.keys(querySet.parameters);
+
+        var sel = this.createRawSelectInput(parameters);
+        sel.val(parameters[0]);
+
+        var updateTable = function(){
+            var selectedP = sel.val();
+            var oldP = querySet.info.p;
+
+            querySet.info.p = selectedP;
+
+            var oldRow, newRow, p;
+
+            var replaceMultiValueRow = function(id){
+                oldRow = table.find('#cvlib_row_'+id);
+                p = querySet.parameters[id];
+                p.query = p.values[0];
+                newRow = UIFactory.createFixedRow(p);
+                oldRow.after( newRow );
+                oldRow.remove();
+            };
+
+            var replaceFixedRow = function(id){
+                oldRow = table.find('#cvlib_row_'+id);
+                p = querySet.parameters[id];
+                p.query = [p.values[0]];
+                newRow = UIFactory.createMultiValueRow(p);
+                oldRow.after( newRow );
+                oldRow.remove();
+            };
+
+            if(oldP !== selectedP){
+                if(oldP) replaceMultiValueRow(oldP);
+                replaceFixedRow(selectedP);
+                table.trigger('resized');
+            }
+        };
+
+        sel.on('change', updateTable);
+
+        table.prepend(
+            $('<tr></tr>')
+                .append(
+                    $('<td colspan=4></td>')
+                        .append(sel)
+                )
+        );
+
+        querySet.info = {
+            type: 'compare',
+            p: null
         };
 
         updateTable();
@@ -830,6 +908,34 @@ var UIFactory = {
             sourceList.append(source);
         }
         container.append(sourceList, targetList);
+
+        return container;
+    },
+
+    /**
+     * Creates a container containing two selections based on the parameter
+     * @param {parameter} p - target of the input widgets
+     * @return {div}
+     */
+    createMultiValueInput: function(p) {
+        var container = $('<div class="cvlib_multiValueInput"></div>');
+        var parameters = /*Object.keys*/(p.values);
+        var sel1 = this.createRawSelectInput(parameters);
+        var sel2 = this.createRawSelectInput(parameters);
+
+        p.setValue([p.values[0],p.values[0]]);
+
+        sel1.on('change', function(){
+            p.query[0] = sel1.val();
+            p.emitter.trigger('change', p);
+        });
+
+        sel2.on('change', function(){
+            p.query[1] = sel2.val();
+            p.emitter.trigger('change', p);
+        });
+
+        container.append(sel1).append(' , ').append(sel2);
 
         return container;
     },
