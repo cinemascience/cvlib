@@ -307,11 +307,26 @@ DatabaseSpecA.prototype.processQueryWithLabels = function(querySet, label, callb
                     for (var value in resultSet.data[i].values) {
                         newLabel = replaceAll(newLabel, '{'+value+'}',resultSet.data[i].values[value]);
                     }
-                    //The tag {result} is replaced the result number of this data point
+                    //The tag {result} is replaced with the result number of this data point
                     newLabel = replaceAll(newLabel, '{result}', i);
                     $.extend(resultSet.data[i],{label: newLabel});
                 }
                 break;
+            case 'compare' :
+                label = patternReplaceAll(label,querySet.parameters);
+                var p = querySet.info.p;
+                var parameters = querySet.parameters;
+                var q = parameters[p].query;
+                for (var i in resultSet.data) {
+                    var newLabel = replaceAll(label,'{'+parameters[p].label+'}', q[i]);
+                    //The tags {compare} and {compare_label} are replaced with values related to the value being compared
+                    newLabel = replaceAll(newLabel, '{compare_label}', parameters[p].label);
+                    newLabel = replaceAll(newLabel, '{compare}', q[i]);
+                    //The tags {result} and {view} are replaced with the index
+                    newLabel = replaceAll(newLabel, '{view}', i);
+                    newLabel = replaceAll(newLabel, '{result}', i);
+                    $.extend(resultSet.data[i],{label: newLabel});
+                }
         }
 
         callback(

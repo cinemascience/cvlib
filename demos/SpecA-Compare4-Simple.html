@@ -22,7 +22,7 @@
         var db = new CVLIB.DatabaseSpecA('data/magnitude-volume-halos-time/info.json', function(querySet){
             var sidebarLayout = CVLIB.UIFactory.createSidebarLayout();
             sidebarLayout.sidebar.append( '<h2>Cinema Viewer<br>Spec A - Compare</h2>' );
-            var queryTable = CVLIB.UIFactory.createCompareQueryTable(querySet, 2);
+            var queryTable = CVLIB.UIFactory.createCompareQueryTable(querySet, 4);
             sidebarLayout.sidebar.append(queryTable);
 
             $('body').append( sidebarLayout );
@@ -33,6 +33,12 @@
             var viewport2 = CVLIB.UIFactory.createViewport();
             sidebarLayout.content.append(viewport2);
 
+            var viewport3 = CVLIB.UIFactory.createViewport();
+            sidebarLayout.content.append(viewport3);
+
+            var viewport4 = CVLIB.UIFactory.createViewport();
+            sidebarLayout.content.append(viewport4);
+
             var renderer = new CVLIB.RendererSpecA();
 
             var renderFunction = function(resultSet){
@@ -40,16 +46,26 @@
                 renderer.render(resultSet.data[0], viewport1.canvas, false);
                 viewport2.label.html(resultSet.data[1].label);
                 renderer.render(resultSet.data[1], viewport2.canvas, false);
+                viewport3.label.html(resultSet.data[2].label);
+                renderer.render(resultSet.data[2], viewport3.canvas, false);
+                viewport4.label.html(resultSet.data[3].label);
+                renderer.render(resultSet.data[3], viewport4.canvas, false);
             };
 
             var updateFunction = function(e){
                 var label = '<div style="position:absolute;top:10px;left:10px">'+
-                                '{compare_label}: {compare}<br><font size="1">'+
+                                'View Number: {view}<br><font size="2">'+
+                                'Phi: {phi}<br>'+
+                                'Theta: {theta}<br>'+
+                                'Time: {time}<br>'+
+                                'VolumeIdx: {volumeIdx}<br>'+
+                                'Volume: {volume}<br>'+
+                                'Halos: {halos}<br>'+
                             '</div>';
                 db.processQueryWithLabels(querySet, label, renderFunction );
             };
 
-			querySet.emitter.on(
+            querySet.emitter.on(
                 'change',
                 updateFunction
             );

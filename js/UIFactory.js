@@ -96,14 +96,21 @@ var UIFactory = {
         return tr;
     },
 
-    createMultiValueRow: function(p) {
-        var tr = $('<tr id="cvlib_row_'+p.label+'" class="cvlib_multiValueRow"></tr>');
+    /**
+     * Creates a TR element with multiple-value input widgets for a parameter
+     * Allows the selection of num different values on the parameter
+     * @param {parameter} p - parameter object
+     * @param {int} num - Number of selectors to have
+     * @return {tr}
+     */
+    createMultiValueRow: function(p, num) {
+        var tr = $('<tr id="cvlib_row_'+p.label+'"></tr>');
 
         // Add Label
         var label = $('<td>' + p.label + '</td>');
         tr.append(label);
 
-        tr.append( $('<td colspan=2></td>').append(this.createMultiValueInput(p)));
+        tr.append( $('<td colspan=3></td>').append(this.createMultiValueInput(p, num)));
 
         return tr;
     },
@@ -291,9 +298,10 @@ var UIFactory = {
     /**
      * Creates a TABLE element with multiple-value input widgets for one parameter and single-value widgets for the others based on a querySet
      * @param {QuerySet} querySet - contains parameters used to generate the table
+     * @param {int} num - The number of values that can be selected for the multiple-value input
      * @return {table}
      */
-    createCompareQueryTable: function(querySet){
+    createCompareQueryTable: function(querySet, num){
         var table = this.createSimpleQueryTable(querySet);
 
         var parameters = Object.keys(querySet.parameters);
@@ -322,7 +330,7 @@ var UIFactory = {
                 oldRow = table.find('#cvlib_row_'+id);
                 p = querySet.parameters[id];
                 p.query = [p.values[0]];
-                newRow = UIFactory.createMultiValueRow(p);
+                newRow = UIFactory.createMultiValueRow(p, num);
                 oldRow.after( newRow );
                 oldRow.remove();
             };
@@ -331,6 +339,10 @@ var UIFactory = {
                 if(oldP) replaceMultiValueRow(oldP);
                 replaceFixedRow(selectedP);
                 table.trigger('resized');
+
+                if (oldP) {
+                    querySet.parameters[oldP].emitter.trigger('change', querySet.parameters[oldP]);
+                }
             }
         };
 
@@ -340,6 +352,7 @@ var UIFactory = {
             $('<tr></tr>')
                 .append(
                     $('<td colspan=4></td>')
+                        .append("Compare ")
                         .append(sel)
                 )
         );
@@ -913,29 +926,28 @@ var UIFactory = {
     },
 
     /**
-     * Creates a container containing two selections based on the parameter
+     * Creates a container containing num selections based on the parameter
      * @param {parameter} p - target of the input widgets
+     * @param {int} num - The number of selectors to have
      * @return {div}
      */
-    createMultiValueInput: function(p) {
+    createMultiValueInput: function(p, num) {
         var container = $('<div class="cvlib_multiValueInput"></div>');
-        var parameters = /*Object.keys*/(p.values);
-        var sel1 = this.createRawSelectInput(parameters);
-        var sel2 = this.createRawSelectInput(parameters);
 
-        p.setValue([p.values[0],p.values[0]]);
-
-        sel1.on('change', function(){
-            p.query[0] = sel1.val();
-            p.emitter.trigger('change', p);
-        });
-
-        sel2.on('change', function(){
-            p.query[1] = sel2.val();
-            p.emitter.trigger('change', p);
-        });
-
-        container.append(sel1).append(' , ').append(sel2);
+        var i = 0;
+        for (i = 0; i < num; i++) {
+            let index = i;
+            p.query[index] = p.values[0];
+            let sel = this.createRawSelectInput(p.values);
+            sel.on('change', function(){
+                p.query[index] = sel.val();
+                p.emitter.trigger('change', p);
+            });
+            container.append(sel);
+            if (i != num-1) {
+                container.append(' , ');
+            }
+        }
 
         return container;
     },
