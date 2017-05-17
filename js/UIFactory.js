@@ -936,17 +936,19 @@ var UIFactory = {
 
         var i = 0;
         for (i = 0; i < num; i++) {
-            let index = i;
-            p.query[index] = p.values[0];
-            let sel = this.createRawSelectInput(p.values);
-            sel.on('change', function(){
-                p.query[index] = sel.val();
-                p.emitter.trigger('change', p);
-            });
-            container.append(sel);
-            if (i != num-1) {
-                container.append(' , ');
-            }
+            (function (){ //nested into a function because javascript doesn't do block scope otherwise
+                var index = i;
+                p.query[index] = p.values[0];
+                var sel = CVLIB.UIFactory.createRawSelectInput(p.values);
+                sel.on('change', function(){
+                    p.query[index] = sel.val();
+                    p.emitter.trigger('change', p);
+                });
+                container.append(sel);
+                if (i != num-1) {
+                    container.append(' , ');
+                }
+            })();
         }
 
         return container;

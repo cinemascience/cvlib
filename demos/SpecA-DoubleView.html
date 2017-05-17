@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <title>Cinema Viewer - Spec A</title>
+    <meta name='description' content='A Cinema Viewer capable of browsing Spec A databases'>
+    <meta name='author' content='Jonas Lukasczyk'>
+    <link rel='stylesheet' href='../css/cvlib.css'>
+    <script src='../lib/jquery-3.1.1.min.js'></script>
+    <script src='../js/Parameter.js'></script>
+    <script src='../js/QuerySet.js'></script>
+    <script src='../js/ResultSet.js'></script>
+    <script src='../js/UIFactory.js'></script>
+    <script src='../js/ControlsPhiTheta.js'></script>
+    <script src='../js/Database.js'></script>
+    <script src='../js/DatabaseSpecA.js'></script>
+    <script src='../js/Renderer.js'></script>
+    <script src='../js/RendererSpecA.js'></script>
+</head>
+<body>
+    <script>
+        var toLoad = 2;
+        var querySets = [];
+        var db1 = new CVLIB.DatabaseSpecA('data/volume-render/info.json', function(qs){loadFinished(qs);});
+        var db2 = new CVLIB.DatabaseSpecA('data/volume-render/info.json', function(qs){loadFinished(qs);});
+
+        var loadFinished = function(qs) {
+            querySets.push(qs);
+            toLoad--;
+            if (toLoad == 0) {
+                doneLoading();
+            }
+        }
+
+        var doneLoading = function() {
+            $('body').append('<h1>SpecA Double View</h1>');
+
+            var container = $('<div></div>');
+            $(container).css({'display':'-webkit-flex',
+                                'display':'flex'});
+            $('body').append(container);
+
+            var queryTable1 = CVLIB.UIFactory.createSimpleQueryTable(querySets[0]);
+            $(queryTable1).css({'-webkit-flex':'initial',
+                                'flex':'initial',
+                                'width':'300px',
+                                'min-width':'200px'});
+            container.append(queryTable1);
+
+            var viewContainer = $('<div></div>');
+            $(viewContainer).css({'position':'relative',
+                                    '-webkit-flex':'1',
+                                    'flex':'1'});
+            var viewport1 = CVLIB.UIFactory.createViewport();
+            $(viewport1).css({'position':'absolute',
+                                'top':'0',
+                                'left':'0',
+                                'display':'initial'})
+            viewContainer.append(viewport1);
+
+            var viewport2 = CVLIB.UIFactory.createViewport();
+            $(viewport2).css({'position':'absolute',
+                                'top':'0',
+                                'right':'0',
+                                'display':'initial'})
+            viewContainer.append(viewport2);
+
+            container.append(viewContainer);
+
+            var queryTable2 = CVLIB.UIFactory.createSimpleQueryTable(querySets[1]);
+            $(queryTable2).css({'-webkit-flex':'initial',
+                                'flex':'initial',
+                                'width':'300px',
+                                'min-width':'200px'});
+            container.append(queryTable2);
+
+            new CVLIB.ControlsPhiTheta(viewport1, querySets[0]);
+            new CVLIB.ControlsPhiTheta(viewport2, querySets[1]);
+
+            var renderer = new CVLIB.RendererSpecA();
+
+            var render1 = function(resultSet){
+                renderer.render(resultSet.data, viewport1.canvas, false);
+            };
+
+            var render2 = function(resultSet){
+                renderer.render(resultSet.data, viewport2.canvas, false);
+            };
+
+            var update1 = function(e, parameter){
+                db1.processQuery(querySets[0], render1);
+            };
+
+            var update2 = function(e, parameter){
+                db2.processQuery(querySets[1], render2);
+            };
+
+            querySets[0].emitter.on(
+                'change',
+                update1
+            );
+
+            querySets[1].emitter.on(
+                'change',
+                update2
+            );
+
+            update1();
+            update2();
+        }
+    </script>
+</body>
+</html>
