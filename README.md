@@ -14,9 +14,7 @@ CVLIB follows a simple system architecture. It provides the following classes:
 * **UIFactory**: generates HTML widgets to request QuerySets and display rendered ResultSets
 * **Controls**: augments HTML widgets elements with mouse interactions such as panning and zooming
 
-A Cinema database is interfaced via the Database class which can process QuerySets. The database will respond with ResultSets which can be rendered with the Renderer. For instance, if the ResultSet contains a collection of depth and diffuse images the renderer is able to composite the images with correct occlusion culling. The UIFactory can generate HTML widgets to adjust QuerySets via input elements and display output from the Renderer with viewports. The different Control classes enable users to zoom, pan, and rotate viewports.
-
-All classes can easily be extended to deal with different Cinema databases, more complex rendering pipelines, or application specific data interactions. For Instance, CVLIB provides the classes DatabaseSpecA and DatabaseSpecC which both are subclasses of Database and process QuerySets according to their respective Spec implementations. For a detailed description of all available classes see the **Documentation**.
+A Cinema database is interfaced via the Database class which can process QuerySets. The database will respond with ResultSets which can be rendered with the Renderer. The UIFactory can generate HTML widgets to adjust QuerySets via input elements and display output from the Renderer with viewports. The different Control classes enable users to zoom, pan, and rotate viewports.
 
 ### Examples
 To create viewers one simply has to use the modules and interconnect them.
