@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang='en'>
+<head>
+	<meta charset='utf-8'>
+	<meta name='description' content='A Cinema Application for viewing Spec A databases'>
+	<meta name='author' content='Cameron Tauxe'>
+	<link rel='stylesheet' href='../css/cinemaWebApp.css'>
+	<!-- jquery -->
+	<script src='../lib/jquery-3.1.1.min.js'></script>
+	<!-- cvlib -->
+    <script src='../js/Parameter.js'></script>
+    <script src='../js/QuerySet.js'></script>
+    <script src='../js/ResultSet.js'></script>
+    <script src='../js/UIFactory.js'></script>
+    <script src='../js/ControlsBasic.js'></script>
+	<script src='../js/ControlsPhiTheta.js'></script>
+    <script src='../js/Database.js'></script>
+    <script src='../js/DatabaseSpecA.js'></script>
+    <script src='../js/Renderer.js'></script>
+    <script src='../js/RendererSpecA.js'></script>
+	<!-- webApp specific -->
+	<script src = '../js/webapp/BuildViewer.js'></script>
+	<script src = '../js/webapp/BuildSingleContent.js'></script>
+	<script src = '../js/webapp/BuildMatrixContent.js'></script>
+	<script src = '../js/webapp/BuildSearchContent.js'></script>
+	<script src = '../js/webapp/BuildCompare2Content.js'></script>
+	<script src = '../js/webapp/BuildCompare4Content.js'></script>
+	<script src = '../js/webapp/BuildLabel.js'></script>
+</head>
+<body>
+	<header id="header">
+		<h1 id="title">
+			Cinema Spec A Viewer
+		</h1>
+	</header>
+
+	<div id="controlsPane">
+		<div id="launchPanel" class="controlPanel">
+			<div class="controlTitle">
+				Database Select
+			</div>
+			<div class="controlSubPanel">
+				Database:
+				<select id="databaseSelect">
+					<option value="data/magnitude-volume-halos-time/info.json">Cosmology</option>
+					<option value="data/volume-render/info.json">Volume Render</option>
+				</select>
+				<br>
+				Viewing Mode:
+				<select id="modeSelect">
+					<option value="single">Single</option>
+					<option value="matrix">Matrix</option>
+					<option value="search">Search</option>
+					<option value="compare2">Compare (2)</option>
+					<option value="compare4">Compare (4)</option>
+				</select>
+			</div>
+			<button class="loadButton" mode="launch" onclick="onLaunch()">Launch</button>
+		</div>
+	</div>
+
+	<div id="contentPane"></div>
+
+	<script>
+		var onLaunch = function() {
+			var databasePath = $('#databaseSelect').val();
+			var viewMode = $('#modeSelect').val();
+
+			//clear content and control panes
+			$('div.visControls').remove();
+			$('div.visContents').remove();
+
+			buildViewer(databasePath, viewMode, function() {
+				$('#launchPanel').insertAfter($('div.visControls'));
+			});
+		}
+	</script>
+
+</body>	
