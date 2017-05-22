@@ -71,7 +71,7 @@
 
                 //Iterate through results and add viewports to page
                 x = 0;
-                for (var i = 0 + ((currentPage-1)*resultsPerPage);
+                for (var i = ((currentPage-1)*resultsPerPage);
                         i < currentPage*resultsPerPage && i < results.count;
                         i++) {
                     var viewport = CVLIB.UIFactory.createViewport();

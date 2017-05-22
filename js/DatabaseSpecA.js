@@ -199,27 +199,32 @@ DatabaseSpecA.prototype.processQuery = function(querySet, callback){
             break;
         case 'search' :
             var parameters = querySet.parameters;
-            var count = Object.keys(parameters).length;
+            var keys = Object.keys(parameters)
             var data = [];
-            //Recursive function: Iterates through all combinations of queries and adds to the resultSet.
-            //Also stores values of each parameter with each result.
-            var addResultsFromParam = function(index, values) {
-                var p = parameters[Object.keys(parameters)[index]];
-                for (var q in p.query) {
-                    var newValues = $.extend({}, values);//Copy values into newValues
-                    newValues[p.label] = p.query[q];
-                    if (index === count-1) {
+
+            /**
+             * Add all possible results for the queries for all parameters at keyIndex and past,
+             * Using currentValues to define the values for parameters before keyIndex.
+             * (works recursively)
+             */
+            var addResults = function(keyIndex, currentValues) {
+                var p = parameters[keys[keyIndex]];
+                for (q in p.query) {
+                    var newValues = $.extend({},currentValues);//Copy values
+                    newValues[keys[keyIndex]] = p.query[q];
+                    if (keyIndex == keys.length-1) {
                         var path = pattern;
-                        for (var val in newValues)
-                            path = replaceAll(path, '{'+val+'}',newValues[val]);
-                        data.push({ type: 'image', src: dir + path, values: newValues });
+                        for (var i in newValues)
+                            path = replaceAll(path, '{'+i+'}', newValues[i]);
+                        data.push({type:'image', src: dir + path, values: newValues});
                     }
                     else {
-                        addResultsFromParam(index+1, newValues);
+                        addResults(keyIndex+1, newValues);
                     }
                 }
-            };
-            addResultsFromParam(0,pattern);
+            }
+            //Add all results for all parameters
+            addResults(0,{});
 
             resultSet = new CVLIB.ResultSet(
                 querySet.serialize(),
@@ -272,7 +277,7 @@ DatabaseSpecA.prototype.processQueryWithLabels = function(querySet, label, callb
     var patternReplaceAll = function(pattern, parameters){
         for(var i in parameters){
             if($.isArray(parameters[i].query)) continue;
-            pattern = replaceAll(pattern, '{'+i+'}', parameters[i].query);
+            pattern = replaceAll(pattern, '{'+parameters[i].label+'}', parameters[i].query);
         }
         return pattern;
     };
@@ -305,7 +310,8 @@ DatabaseSpecA.prototype.processQueryWithLabels = function(querySet, label, callb
                 for (var i in resultSet.data) {
                     var newLabel = label;
                     for (var value in resultSet.data[i].values) {
-                        newLabel = replaceAll(newLabel, '{'+value+'}',resultSet.data[i].values[value]);
+                        var p = querySet.parameters[value];
+                        newLabel = replaceAll(newLabel, '{'+p.label+'}',resultSet.data[i].values[value]);
                     }
                     //The tag {result} is replaced with the result number of this data point
                     newLabel = replaceAll(newLabel, '{result}', i);

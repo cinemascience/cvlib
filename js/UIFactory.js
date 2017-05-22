@@ -110,7 +110,9 @@ var UIFactory = {
         var label = $('<td>' + p.label + '</td>');
         tr.append(label);
 
-        tr.append( $('<td colspan=3></td>').append(this.createMultiValueInput(p, num)));
+        tr.append('<td>'+this.getTypeSymbol(p.type)+'</td>');
+
+        tr.append( $('<td colspan=2></td>').append(this.createMultiValueInput(p, num)));
 
         return tr;
     },
@@ -216,10 +218,10 @@ var UIFactory = {
             return;
         }
 
-        var sel1 = this.createRawSelectInput( parameters );
+        var sel1 = this.createRawParameterSelect(querySet);
         sel1.oldValue = parameters[0];
         sel1.val(parameters[0]);
-        var sel2 = this.createRawSelectInput( parameters );
+        var sel2 = this.createRawParameterSelect(querySet);
         sel2.oldValue = parameters[1];
         sel2.val(parameters[1]);
 
@@ -242,7 +244,7 @@ var UIFactory = {
             var oldRow, newRow, p;
 
             var replaceVariableRow = function(id){
-                oldRow = table.find('#cvlib_row_'+id);
+                oldRow = table.find('#cvlib_row_'+querySet.parameters[id].label);
                 p = querySet.parameters[id];
                 p.query = p.values[0];
                 newRow = UIFactory.createFixedRow(p);
@@ -251,7 +253,7 @@ var UIFactory = {
             };
 
             var replaceFixedRow = function(id){
-                oldRow = table.find('#cvlib_row_'+id);
+                oldRow = table.find('#cvlib_row_'+querySet.parameters[id].label);
                 p = querySet.parameters[id];
                 p.query = [p.values[0]];
                 newRow = UIFactory.createVariableRow(p);
@@ -306,7 +308,7 @@ var UIFactory = {
 
         var parameters = Object.keys(querySet.parameters);
 
-        var sel = this.createRawSelectInput(parameters);
+        var sel = this.createRawParameterSelect(querySet);
         sel.val(parameters[0]);
 
         var updateTable = function(){
@@ -318,7 +320,7 @@ var UIFactory = {
             var oldRow, newRow, p;
 
             var replaceMultiValueRow = function(id){
-                oldRow = table.find('#cvlib_row_'+id);
+                oldRow = table.find('#cvlib_row_'+querySet.parameters[id].label);
                 p = querySet.parameters[id];
                 p.query = p.values[0];
                 newRow = UIFactory.createFixedRow(p);
@@ -327,7 +329,7 @@ var UIFactory = {
             };
 
             var replaceFixedRow = function(id){
-                oldRow = table.find('#cvlib_row_'+id);
+                oldRow = table.find('#cvlib_row_'+querySet.parameters[id].label);
                 p = querySet.parameters[id];
                 p.query = [p.values[0]];
                 newRow = UIFactory.createMultiValueRow(p, num);
@@ -675,6 +677,21 @@ var UIFactory = {
             select.append('<option'+ (values ? ' value="'+values[i]+'"' : '') +'>'+labels[i]+'</option>');
 
         return select;
+    },
+
+    /**
+     * Creates a SELECT element for selecting a parameter of the given querySet
+     * @param {querySet} querySet
+     * @return {select}
+     */
+    createRawParameterSelect: function(querySet) {
+        var keys = [];
+        var labels = [];
+        for (var p in querySet.parameters) {
+            keys.push(p)
+            labels.push(querySet.parameters[p].label);
+        }
+        return this.createRawSelectInput(labels,keys);
     },
 
     /**
