@@ -1,4 +1,4 @@
-@import 'cvlib.css';
+@import '../css/cvlib.css';
 
 body {
     background: radial-gradient(circle, #222222 25%, #111111 60%);

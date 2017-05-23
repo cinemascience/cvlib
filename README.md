@@ -4,7 +4,7 @@ CVLIB is a library which provides a JavaScript API to Paraview Cinema databases 
 
 In contrast to other Cinema viewers this library is focusing on modular expandability. Most applications have additional viewer requirements such as specialized data visualizations, aggregations, interactions, and other features a generic all-in-one viewer can not provide. Hence, CVLIB provides functions to access Cinema databases, process queries, create viewer UI elements, render results, and interact with the visualization so that users can build their own custom viewer.
 
-The **Demos** folder contains many pre-built viewers and sample databases to study how to use cvlib in various ways. It is recommended to first look at the viewers marked with a **BEG** (for beginner) before examining the intermediate (**INT**) and advanced (**ADV**) viewers. **ADV_FullViewer.html** is a fully-featured viewer capable of viewing the sample databases in multiple ways.
+The **Demos** folder contains many pre-built viewers and sample databases to study how to use cvlib in various ways. It is recommended to first look at the viewers marked with a **BEG** (for beginner) before examining the intermediate (**INT**) and advanced (**ADV**) viewers.
 
 ### Architecture
 CVLIB follows a simple system architecture. It provides the following classes:
