@@ -34,7 +34,7 @@
 		</h1>
 	</header>
 
-	<div id="controlsPane">
+	<div id="controlsPane" class="controlsPane" side="left">
 		<div id="launchPanel" class="controlPanel">
 			<div class="controlTitle">
 				Database Select
@@ -59,7 +59,7 @@
 		</div>
 	</div>
 
-	<div id="contentPane"></div>
+	<div id="contentPane" class="contentPane" side="left"></div>
 
 	<script>
 		var onLaunch = function() {
@@ -72,6 +72,50 @@
 
 			buildViewer(databasePath, viewMode, function() {
 				$('#launchPanel').insertAfter($('div.visControls'));
+			});
+		}
+
+		var buildViewer = function(databasePath, viewMode, callback) {
+			var database
+			var querySet;
+			var contents;
+
+			database = new CVLIB.DatabaseSpecA(databasePath, function(qs) {
+				querySet = qs;
+				switch (viewMode) {
+					case 'single':
+						contents = buildSingleContent(database, querySet);
+						break;
+					case 'matrix':
+						contents = buildMatrixContent(database, querySet);
+						break;
+					case 'search':
+						contents = buildSearchContent(database, querySet);
+						break;
+					case 'compare2':
+						contents = buildCompare2Content(database, querySet);
+						break;
+					case 'compare4':
+						contents = buildCompare4Content(database, querySet);
+						break;
+					default:
+						contents = buildSingleContent(database, querySet);
+				}
+				
+				$('#controlsPane').append(contents.controls);
+				var controlPaneWidth = $(contents.controls).outerWidth(true);
+				$('#controlsPane').css('width',controlPaneWidth + 'px');
+				
+				var side = $('#contentPane').attr('side');
+				if(side == 'left' || side == 'both') {
+					$('#contentPane').css('margin-left',controlPaneWidth + 50 + 'px');
+				}
+				if (side == 'right' || side == 'both') {
+					$('#contentPane').css('margin-right',controlPaneWidth + 50 + 'px');
+				}
+				$('#contentPane').append(contents.content);
+
+				callback();
 			});
 		}
 	</script>
