@@ -19,7 +19,7 @@ RendererSpecA.prototype.constructor = RendererSpecA;
  * @param {canvas} canvasJQ - canvas in JQ representation
  * @param {bool} abortOld - if true abort old render process
  */
-RendererSpecA.prototype.render = function(element, canvasJQ, abortOld){
+RendererSpecA.prototype.render = function(element, canvasJQ, abortOld, callback){
     var canvas = canvasJQ[0];
     switch (element.type) {
         case 'image':
@@ -27,6 +27,7 @@ RendererSpecA.prototype.render = function(element, canvasJQ, abortOld){
                 canvas.width = element.img.width;
                 canvas.height = element.img.height;
                 canvas.getContext('2d').drawImage(element.img, 0, 0);
+                canvas.img = element.img;
             }
             else {
                 this.imageLoader.ignore = abortOld;
@@ -41,6 +42,10 @@ RendererSpecA.prototype.render = function(element, canvasJQ, abortOld){
                         canvasJQ.trigger('resized');
                     }
                     canvas.getContext('2d').drawImage(this, 0, 0);
+                    canvas.img = element.img;
+
+                    if (callback)
+                        callback();
                 };
                 this.imageLoader.src = element.src;
             }

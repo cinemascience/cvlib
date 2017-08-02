@@ -42,6 +42,19 @@ QuerySet.prototype.serialize = function(){
     };
 };
 
+QuerySet.prototype.deserialize = function(json){
+    if (this.info.type == json.info.type) {
+        for (var i in json.parameters) {
+            if (this.parameters[i])
+                this.parameters[i].setValue(json.parameters[i]);
+            else
+                console.log("Error: Could not load parameter " + i);
+        }
+    }
+    else
+        console.log("Error: Could not load query of different type")
+}
+
 /**
  * Creates a clone of the QuerySet
  * @return {QuerySet}

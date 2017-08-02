@@ -54,7 +54,7 @@ var UIFactory = {
      * @return {tr}
      */
     createVariableRow: function(p){
-        var tr = $('<tr id="cvlib_row_'+p.label+'" class="cvlib_variableRow"></tr>');
+        var tr = $('<tr id="cvlib_row_'+p.label.replace(' ','_')+'" class="cvlib_variableRow"></tr>');
 
         // Add Label
         var label = $('<td>' + p.label + '</td>');
@@ -104,7 +104,7 @@ var UIFactory = {
      * @return {tr}
      */
     createMultiValueRow: function(p, num) {
-        var tr = $('<tr id="cvlib_row_'+p.label+'"></tr>');
+        var tr = $('<tr id="cvlib_row_'+p.label.replace(' ','_')+'"></tr>');
 
         // Add Label
         var label = $('<td>' + p.label + '</td>');
@@ -123,7 +123,7 @@ var UIFactory = {
      * @return {tr}
      */
     createFixedRow: function(p){
-        var tr = $('<tr id="cvlib_row_'+p.label+'"></tr>');
+        var tr = $('<tr id="cvlib_row_'+p.label.replace(' ','_')+'"></tr>');
 
         // Add Label
         var label = $('<td>' + p.label + '</td>');
@@ -219,9 +219,11 @@ var UIFactory = {
         }
 
         var sel1 = this.createRawParameterSelect(querySet);
+        sel1.attr('class','p1_select');
         sel1.oldValue = parameters[0];
         sel1.val(parameters[0]);
         var sel2 = this.createRawParameterSelect(querySet);
+        sel2.attr('class','p2_select');
         sel2.oldValue = parameters[1];
         sel2.val(parameters[1]);
 
@@ -244,7 +246,7 @@ var UIFactory = {
             var oldRow, newRow, p;
 
             var replaceVariableRow = function(id){
-                oldRow = table.find('#cvlib_row_'+querySet.parameters[id].label);
+                oldRow = table.find('#cvlib_row_'+querySet.parameters[id].label.replace(' ','_'));
                 p = querySet.parameters[id];
                 p.query = p.values[0];
                 newRow = UIFactory.createFixedRow(p);
@@ -253,7 +255,7 @@ var UIFactory = {
             };
 
             var replaceFixedRow = function(id){
-                oldRow = table.find('#cvlib_row_'+querySet.parameters[id].label);
+                oldRow = table.find('#cvlib_row_'+querySet.parameters[id].label.replace(' ','_'));
                 p = querySet.parameters[id];
                 p.query = [p.values[0]];
                 newRow = UIFactory.createVariableRow(p);
@@ -309,6 +311,7 @@ var UIFactory = {
         var parameters = Object.keys(querySet.parameters);
 
         var sel = this.createRawParameterSelect(querySet);
+        sel.attr('class','p_select');
         sel.val(parameters[0]);
 
         var updateTable = function(){
@@ -320,7 +323,7 @@ var UIFactory = {
             var oldRow, newRow, p;
 
             var replaceMultiValueRow = function(id){
-                oldRow = table.find('#cvlib_row_'+querySet.parameters[id].label);
+                oldRow = table.find('#cvlib_row_'+querySet.parameters[id].label.replace(' ','_'));
                 p = querySet.parameters[id];
                 p.query = p.values[0];
                 newRow = UIFactory.createFixedRow(p);
@@ -329,7 +332,7 @@ var UIFactory = {
             };
 
             var replaceFixedRow = function(id){
-                oldRow = table.find('#cvlib_row_'+querySet.parameters[id].label);
+                oldRow = table.find('#cvlib_row_'+querySet.parameters[id].label.replace(' ','_'));
                 p = querySet.parameters[id];
                 p.query = [p.values[0]];
                 newRow = UIFactory.createMultiValueRow(p, num);
@@ -578,47 +581,6 @@ var UIFactory = {
     },
 
     /**
-     * Creates a number INPUT element with min, max, and default value
-     * @param {number} min - min
-     * @param {number} max - max
-     * @param {number} value - default value
-     * @return {input}
-     */
-    /*createRawNumberInput: function(min, max, value){
-        // return $('<input type="number" min="'+min+'" max="'+max+'" value="'+value+'">');
-        // Fix number format
-        // return $('<input type="number" value="'+value+'" readonly>');
-        return $('<input class="cvlib_numberInput" type="text" value="'+value+'" readonly>');
-    },*/
-
-    /**
-     * Creates a number INPUT element for a parameter
-     * @param {parameter} p - target of the input widget
-     * @return {input}
-     */
-    /*createNumberInput: function(p) {
-        var input = this.createRawNumberInput(p.values[0], p.values[p.values.length-1], p.query);
-
-        input.oldValue = p.query;
-
-        p.emitter.on('change', function(input, e, p){
-            input.oldValue = p.query;
-            input.val(p.query);
-        }.bind(null, input));
-
-        // Fix number format
-        // input.on('input', function(input, p){
-        //     var v = parseFloat(input.val());
-        //     v = input.oldValue < v
-        //         ? p.values[ Math.min(p.values.indexOf(input.oldValue)+1, p.values.length-1)]
-        //         : p.values[ Math.max(p.values.indexOf(input.oldValue)-1, 0)];
-        //     p.setValue(parseFloat(v));
-        // }.bind(null, input, p));
-
-        return input;
-    },*/
-
-    /**
      * Creates a number label element for a parameter
      * @param {parameter} p - target of the input widget
      * @return {input}
@@ -789,60 +751,14 @@ var UIFactory = {
             p.setValue(query);
         });
 
-        // var inputMin = this.createRawNumberInput(p.values[0], p.values[p.values.length-1], p.query[0]);
-        // var inputMax = this.createRawNumberInput(p.values[0], p.values[p.values.length-1], p.query[p.query.length-1]);
-
-        // inputMin.oldValue = p.query[0];
-        // inputMax.oldValue = p.query[p.query.length-1];
-
-        // p.emitter.on('change', function(inputMin, inputMax, e, p){
-        //     inputMin.oldValue = p.query[0];
-        //     inputMin.val(p.query[0]);
-
-        //     inputMax.oldValue = p.query[p.query.length-1];
-        //     inputMax.val(p.query[p.query.length-1]);
-        // }.bind(null, inputMin, inputMax));
-
-        // Fix number input
-        // inputMin.on('input', function(inputMin, inputMax, p){
-        //     var v = parseFloat(inputMin.val());
-        //     v = inputMin.oldValue < v
-        //         ? p.values[ Math.min(p.values.indexOf(inputMin.oldValue)+1, p.values.length-1)]
-        //         : p.values[ Math.max(p.values.indexOf(inputMin.oldValue)-1, 0)];
-        //     v = parseFloat(v);
-        //     if(parseFloat(inputMax.val())<v){
-        //         inputMax.val(v);
-        //         inputMax.oldValue = v;
-        //     }
-        //     inputMin.val(v);
-        //     inputMin.oldValue = v;
-
-        //     var query = [];
-        //     for(var i=p.values.indexOf(v); i<=p.values.indexOf(parseFloat(inputMax.val())); i++)
-        //         query.push(p.values[i]);
-
-        //     p.setValue(query);
-        // }.bind(null, inputMin, inputMax, p));
-
-        // inputMax.on('input', function(inputMin, inputMax, p){
-        //     var v = parseFloat(inputMax.val());
-        //     v = inputMax.oldValue < v
-        //         ? p.values[ Math.min(p.values.indexOf(inputMax.oldValue)+1, p.values.length-1)]
-        //         : p.values[ Math.max(p.values.indexOf(inputMax.oldValue)-1, 0)];
-        //     v = parseFloat(v);
-        //     if(parseFloat(inputMin.val())>v){
-        //         inputMin.val(v);
-        //         inputMin.oldValue = v;
-        //     }
-        //     inputMax.val(v);
-        //     inputMax.oldValue = v;
-
-        //     var query = [];
-        //     for(var i=p.values.indexOf(parseFloat(inputMin.val())); i<=p.values.indexOf(v); i++)
-        //         query.push(p.values[i]);
-
-        //     p.setValue(query);
-        // }.bind(null, inputMin, inputMax, p));
+        p.emitter.on('change', function(e) {
+            var max = p.values.indexOf(p.query[p.query.length-1]);
+            var min = p.values.indexOf(p.query[0]);
+            maxInput.val(max);
+            minInput.val(min);
+            maxInputVis.text(p.values[max]);
+            minInputVis.text(p.values[min]);
+        });
 
         return [minInput, minInputVis, maxInput, maxInputVis];
     },
@@ -954,9 +870,12 @@ var UIFactory = {
         var i = 0;
         for (i = 0; i < num; i++) {
             (function (){ //nested into a function because javascript doesn't do block scope otherwise
+                            //coming back to this function months later, I realize how much I've improved with javascript since then
+                            //and seeing hackiness like this makes me cringe, but I don't have time to rewrite it now so I must live with it :(
                 var index = i;
                 p.query[index] = p.values[0];
                 var sel = CVLIB.UIFactory.createRawSelectInput(p.values);
+                sel.attr('class','p_'+index);
                 sel.on('change', function(){
                     p.query[index] = sel.val();
                     p.emitter.trigger('change', p);
@@ -967,6 +886,13 @@ var UIFactory = {
                 }
             })();
         }
+
+        p.emitter.on('change',function() {
+            for(var i in p.query) {
+                var sel = container.find('.p_'+i);
+                sel.val(p.query[i]);
+            }
+        });
 
         return container;
     },
