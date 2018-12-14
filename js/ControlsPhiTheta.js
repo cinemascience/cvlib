@@ -55,22 +55,23 @@ function ControlsPhiTheta(viewport, querySet){
     }
 
     var onMouseDown = function(e){
-        if(!e.ctrlKey) return;
+        if (e.which !== 1) return;
         e.preventDefault();
         x0 = e.clientX;
         y0 = e.clientY;
 
         mode = -1;
-        switch (e.which) {
-            case 1: // Panning
-                mode = 1;
-                break;
-            case 3: // Rotating
-                mode = 0;
-                t = theta.query;
-                p = phi.query;
-                tOld = t;
-                pOld = p;
+        if (e.shiftKey) {
+            // Panning
+            mode = 1;
+        }
+        else {
+            // Rotating
+            mode = 0;
+            t = theta.query;
+            p = phi.query;
+            tOld = t;
+            pOld = p;
         }
 
         viewport.off('mousedown', onMouseDown);
@@ -133,7 +134,6 @@ function ControlsPhiTheta(viewport, querySet){
     };
 
     var onMouseWheel = function(e){
-        if(!e.ctrlKey) return;
         e.preventDefault();
         e.stopPropagation();
 

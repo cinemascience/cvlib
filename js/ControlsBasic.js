@@ -13,7 +13,7 @@ function ControlsBasic(viewport){
     var x0=0, y0=0;
 
     var onMouseDown = function(e){
-        if(!e.ctrlKey || e.which!==1) return;
+        if(e.which !== 1) return;
         e.preventDefault();
         x0 = e.clientX;
         y0 = e.clientY;
@@ -51,7 +51,6 @@ function ControlsBasic(viewport){
     };
 
     var onMouseWheel = function(e){
-        if(!e.ctrlKey) return;
         e.preventDefault();
         e.stopPropagation();
 
