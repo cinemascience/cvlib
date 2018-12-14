@@ -1,5 +1,7 @@
 # CVLIB - Cinema Viewer Library
 
+## NOTE: CVLIB is for Spec-A Cinema Databases ONLY!
+
 CVLIB is a library which provides a JavaScript API to Paraview Cinema databases for visualization in the Browser.
 
 In contrast to other Cinema viewers this library is focusing on modular expandability. Most applications have additional viewer requirements such as specialized data visualizations, aggregations, interactions, and other features a generic all-in-one viewer can not provide. Hence, CVLIB provides functions to access Cinema databases, process queries, create viewer UI elements, render results, and interact with the visualization so that users can build their own custom viewer.
