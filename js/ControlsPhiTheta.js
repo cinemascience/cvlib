@@ -2,7 +2,9 @@
 (/** @lends module:CVLIB */function(){
 
 /**
- * Augments a viewport with mouse-controls to zoom, pan, and rotate according to a phi-theta camera model
+ * Augments a viewport with mouse-controls to zoom, pan, and rotate according to a phi-theta camera model.
+ * With these controls, left-click-and-dragging on the image rotates the view, scrolling resizes the image
+ * and shift-click-and-dragging pans the image.
  * @constructor
  * @param {viewport} viewport - viewport which is target of the mouse interaction
  * @param {QuerySet} querySet - is updated after view is rotated

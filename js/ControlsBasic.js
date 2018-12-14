@@ -2,7 +2,8 @@
 (/** @lends module:CVLIB */function(){
 
 /**
- * Augments a viewport with mouse-controls to zoom and pan
+ * Augments a viewport with mouse-controls to zoom and pan.
+ * With these controls, left-click-and-dragging pans the image and scrolling zooms the image.
  * @constructor
  * @param {viewport} viewport - viewport which is target of the mouse interaction
  */
