@@ -15,7 +15,7 @@ function ControlsPhiTheta(viewport, querySet){
     var phi;
     var temp;
 
-    var tMin, tMax, pMin, pMax, t, p, tOld, pOld;
+    var tMin, tMax, pMin, pMax, t, p, tNum, pNum, tOld, pOld;
 
     var epsX = 0.4;
     var epsY = 0.8;
@@ -46,11 +46,10 @@ function ControlsPhiTheta(viewport, querySet){
             if(pMax < temp) pMax = temp;
         }
 
-        theta.query = parseFloat(theta.query);
-        phi.query = parseFloat(phi.query);
-
         t = theta.query;
         p = phi.query;
+        tNum = parseFloat(t);
+        pNum = parseFloat(p);
     } else {
         console.error('Unable to create OrbitControls: QuerySet does not have a "theta" or "phi" parameter');
         return;
@@ -72,6 +71,8 @@ function ControlsPhiTheta(viewport, querySet){
             mode = 0;
             t = theta.query;
             p = phi.query;
+            tNum = parseFloat(t);
+            pNum = parseFloat(p);
             tOld = t;
             pOld = p;
         }
@@ -103,11 +104,11 @@ function ControlsPhiTheta(viewport, querySet){
         var dy = (y0-e.clientY);
         if(mode===0){
             // Rotate
-            t = Math.max(tMin, Math.min(tMax, t + dy*epsX));
-            p = Math.max(pMin, Math.min(pMax, p + dx*epsX));
+            tNum = Math.max(tMin, Math.min(tMax, tNum + dy*epsX));
+            pNum = Math.max(pMin, Math.min(pMax, pNum + dx*epsX));
 
-            var tNew = snapToValue(t, theta.values);
-            var pNew = snapToValue(p, phi.values);
+            var tNew = snapToValue(tNum, theta.values);
+            var pNew = snapToValue(pNum, phi.values);
 
             if(tOld!==tNew || pOld!==pNew){
                 tOld = tNew;
